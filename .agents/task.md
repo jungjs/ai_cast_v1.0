@@ -8,25 +8,20 @@
 ## 👥 에이전트별 태스크 할당
 
 ### 👤 Dave - 사용 모델: DeepSeek V4 Flash
-- [x] **T-10. Type A & B 문서 내 깨진 링크 수정 및 정합성 교정**
-  - `000_README.md`: 205_RBAC_MENU_GOVERNANCE 링크 제거, .planning/DECISIONS/CONTEXT → PROJECT.md 로 수정, 10_Reference/000_README → 000_Reference_README.md 로 수정
-  - `101_ZEN_A4_METHODOLOGY.md`: DECISIONS.md → PROJECT.md, 08_Self_Audit/000_README → 001_Self_Audit_Overview.md 로 수정
-  - `102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md`: 08_Self_Audit/000_README → 001_Self_Audit_Overview.md 로 수정 (2건)
-  - `206_DOCS_AND_SCRIPT_GOVERNANCE.md`: 205_RBAC_MENU_GOVERNANCE 링크 제거
-  - `docs/00_GUIDE/000_README.md`, `docs/00_GUIDE/101_ZEN_A4_METHODOLOGY.md` 등 핵심 설계 가이드 및 규칙 폴더 내의 상대 링크 오류를 전수 검출하여 실존하는 경로로 수정합니다.
-  - 예: 존재하지 않는 `205_RBAC_MENU_GOVERNANCE.md` 링크 제거, `.planning/` 및 `10_Reference/` 내의 잘못된 파일명(예: `000_Reference_README.md`) 링크 수정.
-- [x] **T-11. Self Audit (SAR) 보고서 공식 작성**
-  - `docs/08_Self_Audit/SAR_reports/` 디렉토리에 다음 2종의 누락된 상세 보고서 마크다운 문서를 신설합니다.
-    - [NEW] `SAR_2026-04-08_001_Documentation_ReadmeLinkErrors.md` (마크다운 링크 깨짐 이슈 정의 및 조치 내용)
-    - [NEW] `SAR_2026-04-17_002_Documentation_DesignConsistency.md` (Zenith LMS 포팅 과정에서의 잔존 명세/명칭 불일치 분석 및 교정 내용)
+- [ ] **T-14. testdata-generator Maven 독립 프로젝트 초기화**
+  - 메인 프로그램과 완전히 독립된 디렉토리인 `testdata-generator/`를 신설하고 `pom.xml`을 생성합니다.
+  - 빌드 및 실행을 위한 최소한의 라이브러리(Azure Speech SDK, Lombok, JUnit5)만을 세팅합니다.
+- [ ] **T-15. 마크다운 파서 및 Azure TTS 연동 컴포넌트 개발**
+  - [TtsClient.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/client/TtsClient.java)를 구현하여 Azure Text-to-Speech(TTS) API를 활용해 본문 텍스트를 고품질 한국어 음성(`.wav`)으로 변환 및 저장하는 기능을 개발합니다.
+  - 마크다운 파서 모듈을 구현하여 `AI_Cast/docs/80_RawData/마을방송테스트문구.md` 파일로부터 각 시나리오의 [제목] 및 [본문]을 추출하고, 제목에서 특수기호를 제거해 안전한 파일명으로 매핑하는 정규식 추출 로직을 구축합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
-- [x] **T-12. Type C 문서(템플릿/참조) 내 깨진 링크 수정**
-  - `docs/09_TEMPLATES/`, `docs/10_Reference/` 디렉토리 내의 템플릿과 구버전 참조 문서들에 잔존해 있는 깨진 마크다운 링크들을 교정하여 문서 시스템의 무결성을 확보합니다.
-- [x] **T-13. 최종 링크 상태 검증 및 Overview 업데이트**
-  - 전체 마크다운 파일들의 상대 링크들이 깨짐 없이 100% 정상 참조되는지 유틸리티 또는 스크립트로 최종 검증합니다.
-  - 검증 완료 후, [001_Self_Audit_Overview.md](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/AI_Cast/docs/08_Self_Audit/001_Self_Audit_Overview.md) 내의 001 및 002번 건의 상태를 기존 `"미해결"`에서 `"✅ 해결"`로 갱신합니다.
-  - 결과: overview 문서 내 날짜 및 002 링크 교차 수정 완료.
+- [ ] **T-16. Java AWT 기반 카드뉴스 이미지 렌더러 개발**
+  - [ImageRenderer.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/engine/ImageRenderer.java)를 구현하여 Java 표준 AWT Graphics2D 환경을 기반으로 800x800 규격의 카드 뉴스 PNG 이미지를 렌더링하고 내보내는 엔진을 개발합니다.
+  - 제목 텍스트에 포함된 키워드(예: '폭염', '태풍', '산불' 등)에 따라 재난(Red/Orange) 또는 일반안내(Blue/Green)의 적절한 카드 배경 테마 컬러를 맵핑하고 본문 텍스트를 줄바꿈하여 카드 중심에 출력하는 렌더링 로직을 개발합니다.
+- [ ] **T-17. TestDataGenerator 메인 오케스트레이터 및 연동 검증**
+  - [TestDataGenerator.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/TestDataGenerator.java) 메인 진입점을 개발하여 환경설정 파일 로드, 마크다운 파싱, TTS 및 이미지 렌더러 파이프라인 연동을 유기적으로 제어합니다.
+  - 생성된 16쌍의 결과물(.wav, .png)이 `AI_Cast/docs/80_RawData/testdata/` 디렉토리 하위에 정상 생성되는지 검증하고 단위 테스트 코드를 작성합니다.
 
 ---
 
