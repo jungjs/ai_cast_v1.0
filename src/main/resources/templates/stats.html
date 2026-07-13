@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('AI Cast 통계', ~{::div})}">
+<div>
+    <!-- Stats CSS/JS -->
+    <link rel="stylesheet" th:href="@{/css/stats.css}">
+
+    <!-- B. 조회 조건 영역 -->
+    <div class="glass-card filter-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="daily">일별</button>
+            <button class="tab-btn" data-tab="weekly">주별</button>
+            <button class="tab-btn" data-tab="monthly">월별</button>
+        </div>
+        <div class="filters">
+            <input type="date" id="dateInput" class="form-control date-picker">
+            <select id="svcFilter" class="form-control select-filter">
+                <option value="ALL">전체 서비스</option>
+                <option value="STT">STT</option>
+                <option value="NLP">NLP</option>
+                <option value="TRANSLATE">TRANSLATE</option>
+                <option value="OCR">OCR</option>
+                <option value="IMAGE_GEN">IMAGE_GEN</option>
+            </select>
+            <!-- 관리자 전용 지자체 필터 (Mock) -->
+            <select id="govFilter" class="form-control select-filter hidden">
+                <option value="ALL">전체 지자체</option>
+                <option value="gov-1">서울시</option>
+                <option value="gov-2">부산시</option>
+            </select>
+            <button id="btnSearch" class="btn-primary">조회</button>
+        </div>
+    </div>
+
+    <!-- C. 요약 카드 (4개) -->
+    <div class="summary-cards">
+        <div class="glass-card stat-card border-blue">
+            <div class="card-title">총 호출수</div>
+            <div class="card-value text-blue" id="stat-tot-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card border-green">
+            <div class="card-title">성공수</div>
+            <div class="card-value text-green" id="stat-ok-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card border-red">
+            <div class="card-title">실패수</div>
+            <div class="card-value text-red" id="stat-fail-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="card-title">성공률</div>
+            <div class="card-value" id="stat-ok-rate">0%</div>
+        </div>
+    </div>
+
+    <!-- 차트 영역 -->
+    <div class="chart-layout">
+        <!-- D. 호출 추이 차트 -->
+        <div class="glass-card chart-container full-width">
+            <div class="chart-header">
+                <h3>서비스 호출 추이</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- E, F. 비율 및 평균 처리시간 -->
+        <div class="chart-grid-3">
+            <div class="glass-card chart-container">
+                <div class="chart-header"><h3>서비스 비율</h3></div>
+                <div class="chart-body"><canvas id="svcRatioChart"></canvas></div>
+            </div>
+            <div class="glass-card chart-container">
+                <div class="chart-header"><h3>성공/실패 비율</h3></div>
+                <div class="chart-body"><canvas id="okFailRatioChart"></canvas></div>
+            </div>
+            <div class="glass-card chart-container">
+                <div class="chart-header"><h3>평균 처리시간 (ms)</h3></div>
+                <div class="chart-body"><canvas id="avgMsChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- G. 상세 통계 테이블 -->
+    <div class="glass-card table-container">
+        <div class="chart-header">
+            <h3>상세 통계</h3>
+        </div>
+        <table id="statsTable" class="display dataTable" style="width:100%">
+            <thead>
+                <tr>
+                    <th>날짜</th>
+                    <th>서비스</th>
+                    <th>총 호출</th>
+                    <th>성공</th>
+                    <th>실패</th>
+                    <th>성공률</th>
+                    <th>평균(ms)</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Stats JS -->
+    <script th:src="@{/js/stats.js}"></script>
+</div>
+</html>

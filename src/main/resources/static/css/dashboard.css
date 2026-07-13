@@ -1,0 +1,153 @@
+/* Alert Banner */
+.alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--warning);
+}
+
+.alert-banner.level-critical {
+    background: rgba(230, 126, 34, 0.15);
+    border-left-color: #e67e22;
+}
+
+.alert-banner.level-emergency {
+    background: rgba(231, 76, 60, 0.2);
+    border-left-color: var(--danger);
+}
+
+.alert-msg { flex-grow: 1; font-weight: 500; }
+.alert-time { color: var(--text-secondary); font-size: 0.9rem; }
+.alert-dismiss { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+    .summary-cards { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+    .summary-cards { grid-template-columns: 1fr; }
+}
+
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.card-title {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.card-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.border-blue { border-top: 3px solid var(--primary); }
+.border-green { border-top: 3px solid var(--success); }
+.border-red { border-top: 3px solid var(--danger); }
+
+.text-blue { color: var(--primary); }
+.text-green { color: var(--success); }
+.text-red { color: var(--danger); }
+
+/* Chart Grid */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .chart-grid { grid-template-columns: 1fr; }
+}
+
+.chart-container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    background: rgba(255,255,255,0.1);
+}
+.badge.warn { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.badge.crit { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+.chart-body {
+    flex-grow: 1;
+    position: relative;
+    min-height: 0;
+}
+
+/* Recent Logs */
+.mt-2 { margin-top: 1.5rem; }
+.recent-logs-container { padding: 1.5rem; }
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.log-table th, .log-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.log-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    background: rgba(0,0,0,0.2);
+}
+
+.log-table tr:last-child td { border-bottom: none; }
+
+.log-table tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.copyable {
+    cursor: pointer;
+    font-family: monospace;
+    color: var(--primary);
+}
+.copyable:hover { text-decoration: underline; }

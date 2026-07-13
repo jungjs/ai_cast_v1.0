@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 환경 변수 파일 (절대 올리면 안됨!)
+.env
+env/
+
+# 런타임 생성 파일
+logs/
+output/
+
+# IDE/에디터 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db
+
+# 의존성 패키지 (venv 사용 시)
+venv/
+.venv/
+
+guide_doc/

@@ -1,0 +1,25 @@
+# 1. Azure Speech (STT)
+AZURE_SPEECH_KEY=YOUR_AZURE_SPEECH_KEY
+AZURE_SPEECH_REGION=koreacentral
+
+# 2. Azure OpenAI (정제/요약)
+AZURE_OPENAI_KEY=YOUR_AZURE_OPENAI_KEY
+AZURE_OPENAI_ENDPOINT=https://aoai-aicast-dev.openai.azure.com/openai/v1
+AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o
+
+# 3. Azure Translator (번역)
+AZURE_TRANSLATOR_KEY=YOUR_AZURE_TRANSLATOR_KEY
+AZURE_TRANSLATOR_REGION=koreacentral
+
+# 4. Azure Vision (OCR)
+AZURE_VISION_KEY=YOUR_AZURE_VISION_KEY
+AZURE_VISION_ENDPOINT=https://aivision-aicast.cognitiveservices.azure.com/
+
+# 5. Azure Storage (이미지 업로드)
+AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=aicaststoragedev1;AccountKey=YOUR_AZURE_STORAGE_ACCOUNT_KEY;EndpointSuffix=core.windows.net
+AZURE_STORAGE_CONTAINER_NAME=uploads
+
+# Spring AI 호환용 환경 변수
+SPRING_AI_AZURE_OPENAI_API_KEY=YOUR_AZURE_OPENAI_KEY
+SPRING_AI_AZURE_OPENAI_ENDPOINT=https://aoai-aicast-dev.openai.azure.com/openai/v1
+SPRING_AI_AZURE_OPENAI_CHAT_OPTIONS_MODEL=gpt-4o

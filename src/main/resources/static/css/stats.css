@@ -1,0 +1,126 @@
+/* Filter Container */
+.filter-container {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 1rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.form-control.date-picker,
+.form-control.select-filter {
+    margin: 0;
+    width: auto;
+    padding: 0.5rem 1rem;
+}
+
+/* Summary Cards Override */
+.summary-cards {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Chart Layout */
+.chart-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-container.full-width {
+    height: 350px;
+}
+
+.chart-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .chart-grid-3 { grid-template-columns: 1fr; }
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    .filter-container { flex-direction: column; align-items: flex-start; }
+}
+
+/* DataTables Styling Override for Dark Mode */
+.table-container {
+    padding: 1.5rem;
+}
+
+table.dataTable {
+    border-collapse: collapse;
+    color: var(--text-primary) !important;
+}
+table.dataTable thead th, table.dataTable tbody td {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+table.dataTable tbody tr {
+    background-color: transparent !important;
+}
+table.dataTable tbody tr:hover {
+    background-color: rgba(255,255,255,0.05) !important;
+}
+
+/* DataTables Pagination / Filter styling */
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_processing, 
+.dataTables_wrapper .dataTables_paginate {
+    color: var(--text-secondary) !important;
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--text-primary) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+}
+
+/* Badges */
+.svc-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.svc-stt { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+.svc-nlp { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+.svc-translate { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+.svc-ocr { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+.svc-image_gen { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }

@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: ai_cast
+  datasource:
+    url: jdbc:mariadb://211.248.161.43:43306/ai_smartcast
+    username: ai_aventusm
+    password: ai_aventusm!!
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+  sql:
+    init:
+      mode: always # schema.sql 자동 실행
+  ai:
+    azure:
+      openai:
+        api-key: ${AZURE_OPENAI_KEY:}
+        endpoint: ${AZURE_OPENAI_ENDPOINT:}
+        deployment-name: ${AZURE_OPENAI_DEPLOYMENT_NAME:}
+        chat:
+          options:
+            deployment-name: ${AZURE_OPENAI_DEPLOYMENT_NAME:}
+            model: ${AZURE_OPENAI_DEPLOYMENT_NAME:}
+
+# Actuator 모니터링 설정 (F-14)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# AI Cast 전용 설정 (NF-04, F-16 등)
+aicast:
+  monitoring:
+    collection-interval: 5 # 5초 (F-15)
+    alerting:
+      enabled: true
+      debounce-seconds: 60
+  azure:
+    speech:
+      key: ${AZURE_SPEECH_KEY:}
+      region: ${AZURE_SPEECH_REGION:}
+    openai:
+      endpoint: ${AZURE_OPENAI_ENDPOINT:}
+      key: ${AZURE_OPENAI_KEY:}
+      deployment-name: ${AZURE_OPENAI_DEPLOYMENT_NAME:}
+    translator:
+      key: ${AZURE_TRANSLATOR_KEY:}
+      region: ${AZURE_TRANSLATOR_REGION:}
+    vision:
+      endpoint: ${AZURE_VISION_ENDPOINT:}
+      key: ${AZURE_VISION_KEY:}
+    storage:
+      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      container-name: ${AZURE_STORAGE_CONTAINER_NAME:}

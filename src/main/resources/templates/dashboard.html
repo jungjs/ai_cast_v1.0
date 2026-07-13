@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('AI Cast Dashboard', ~{::div})}">
+<div>
+    <!-- Dashboard CSS/JS -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+
+    <!-- B. Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden glass-card">
+        <span id="alert-icon" class="alert-icon">🟠</span>
+        <span id="alert-msg" class="alert-msg">경고 메시지</span>
+        <span id="alert-time" class="alert-time">--:--:--</span>
+        <button class="alert-dismiss" onclick="document.getElementById('alert-banner').classList.add('hidden')">✕</button>
+    </div>
+
+    <!-- C. API 현황 카드 (5개) -->
+    <div class="summary-cards">
+        <div class="glass-card stat-card border-blue">
+            <div class="card-title">API 전체 요청수</div>
+            <div class="card-value text-blue" id="card-tot-req">0</div>
+        </div>
+        <div class="glass-card stat-card border-green">
+            <div class="card-title">API 성공수</div>
+            <div class="card-value text-green" id="card-ok-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card border-red">
+            <div class="card-title">API 실패수</div>
+            <div class="card-value text-red" id="card-fail-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="card-title">성공률</div>
+            <div class="card-value" id="card-ok-rate">0%</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="card-title">실패율</div>
+            <div class="card-value" id="card-fail-rate">0%</div>
+        </div>
+    </div>
+
+    <!-- D. 리소스 차트 (2x2) -->
+    <div class="chart-grid">
+        <div class="glass-card chart-container">
+            <div class="chart-header">
+                <h3>CPU 사용률 <span id="cpu-badge" class="badge">--%</span></h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="cpuChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card chart-container">
+            <div class="chart-header">
+                <h3>메모리 사용량 <span id="mem-badge" class="badge">-- MB</span></h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="memChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card chart-container">
+            <div class="chart-header">
+                <h3>네트워크 I/O</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="netChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card chart-container">
+            <div class="chart-header">
+                <h3>디스크 I/O</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="diskChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- E. 최근 활동 로그 -->
+    <div class="recent-logs-container glass-card mt-2">
+        <div class="chart-header">
+            <h3>최근 활동 로그</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>상태</th>
+                        <th>시각</th>
+                        <th>엔드포인트</th>
+                        <th>지자체</th>
+                        <th>소요시간/결과</th>
+                        <th>Trace ID (클릭 시 복사)</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-logs-body">
+                    <tr><td colspan="6" style="text-align: center;">데이터 없음</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Dashboard JS -->
+    <script th:src="@{/js/dashboard.js}"></script>
+</div>
+</html>

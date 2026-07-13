@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+.env
+logs/
+output/
+# fonts/
+.git
+.gitignore
+
+README.md~
+*.md
+curl_samples.txt
+
+test_*.py
+test_*.sh
+test_*.cmd
+
+# API 도구
+*.postman_collection.json
+
+main_copy.py

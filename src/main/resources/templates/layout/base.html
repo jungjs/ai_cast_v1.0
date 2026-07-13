@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">AI Cast</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Common CSS -->
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <!-- DataTables CSS (optional for stats) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="logo-icon">✨</span>
+            <span class="logo-text">AI Cast</span>
+        </div>
+        <nav class="nav-links">
+            <a th:href="@{/dashboard}" th:classappend="${#httpServletRequest.requestURI == '/dashboard' || #httpServletRequest.requestURI == '/' ? 'active' : ''}">대시보드</a>
+            <a th:href="@{/stats}" th:classappend="${#httpServletRequest.requestURI == '/stats' ? 'active' : ''}">통계</a>
+        </nav>
+        <div class="nav-user">
+            <button id="btn-api-key" class="btn-outline">API Key 인증</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" th:insert="${content}">
+    </main>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal-overlay hidden">
+        <div class="modal-content glass-card">
+            <h2>🔑 API Key 설정</h2>
+            <p>데이터 조회를 위해 시스템에 할당된 API Key를 입력해주세요.</p>
+            <input type="password" id="inputApiKey" placeholder="API Key 입력" class="form-control">
+            <div class="modal-actions">
+                <button id="btnSaveKey" class="btn-primary">저장</button>
+                <button id="btnCancelKey" class="btn-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Common JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script th:src="@{/js/common.js}"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    
+</body>
+</html>
