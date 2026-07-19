@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,6 +81,13 @@ class E2eIntegrationTest {
 
     @AfterEach
     void tearDownCorrelationId() {
+        // 비동기 @Async 로깅 스레드가 데이터베이스 저장을 완료할 수 있도록 대기 (외래키 제약조건 위반 방지)
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         String corrId = MDC.get("correlationId");
         if (corrId != null) {
             // 외래키 cascade delete에 의해 tb_ai_svc_log의 자식 레코드들도 함께 지워짐

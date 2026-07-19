@@ -36,7 +36,8 @@ public class AzureOpenAIClient implements NlpClient {
             org.springframework.ai.chat.messages.UserMessage userMessage = new org.springframework.ai.chat.messages.UserMessage(rawText);
             org.springframework.ai.chat.prompt.Prompt prompt = new org.springframework.ai.chat.prompt.Prompt(java.util.List.of(systemMessage, userMessage));
             
-            String response = chatModel.call(prompt).getResult().getOutput().getContent();
+            org.springframework.ai.chat.model.ChatResponse chatResponse = chatModel.call(prompt);
+            String response = chatResponse.getResult().getOutput().getContent();
             
             // JSON 응답 파싱 (마크다운 코드 블록 래핑 제거)
             String sanitized = response.replaceAll("(?s)^```(?:json)?\\s*|\\s*```$", "").trim();
@@ -44,11 +45,25 @@ public class AzureOpenAIClient implements NlpClient {
             result.setProcessingTimeMs(System.currentTimeMillis() - startTime);
             result.setStatus("SUCCESS");
             
+            // Usage (토큰 사용량) 추출
+            org.springframework.ai.chat.metadata.ChatResponseMetadata metadata = chatResponse.getMetadata();
+            if (metadata != null) {
+                org.springframework.ai.chat.metadata.Usage usage = metadata.getUsage();
+                if (usage != null) {
+                    result.setPromptTokens(usage.getPromptTokens() != null ? usage.getPromptTokens().intValue() : null);
+                    result.setCompletionTokens(usage.getGenerationTokens() != null ? usage.getGenerationTokens().intValue() : null);
+                    result.setTotalTokens(usage.getTotalTokens() != null ? usage.getTotalTokens().intValue() : null);
+                }
+            }
+            
             return result;
         } catch (Exception e) {
             log.error("NLP 처리 실패: {}", e.getMessage(), e);
             long elapsed = System.currentTimeMillis() - startTime;
-            return new NlpResult(null, null, elapsed, "FAILED: " + e.getMessage());
+            return NlpResult.builder()
+                    .processingTimeMs(elapsed)
+                    .status("FAILED: " + e.getMessage())
+                    .build();
         }
     }
 

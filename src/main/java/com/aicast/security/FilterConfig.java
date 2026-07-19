@@ -17,4 +17,13 @@ public class FilterConfig {
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;
     }
+
+    @Bean
+    public FilterRegistrationBean<ApiLogFilter> apiLogFilterRegistration(ApiLogFilter filter) {
+        FilterRegistrationBean<ApiLogFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.addUrlPatterns("/api/*");
+        // ApiKeyAuthFilter 다음으로 실행되도록 순서 지정
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        return registration;
+    }
 }

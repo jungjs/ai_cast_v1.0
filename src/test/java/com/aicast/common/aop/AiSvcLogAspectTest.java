@@ -1,5 +1,7 @@
 package com.aicast.common.aop;
 
+import com.aicast.client.nlp.NlpResult;
+import com.aicast.client.translate.TranslationResult;
 import com.aicast.domain.log.TbAiSvcLog;
 import com.aicast.service.log.AiSvcLogService;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -14,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -167,5 +171,96 @@ class AiSvcLogAspectTest {
         ArgumentCaptor<TbAiSvcLog> unknownCaptor = ArgumentCaptor.forClass(TbAiSvcLog.class);
         verify(aiSvcLogService).saveLog(unknownCaptor.capture());
         assertEquals("UNKNOWN", unknownCaptor.getValue().getSvcType());
+    }
+
+    @Test
+    @DisplayName("NLP 호출 결과에서 토큰 사용량 추출 검증")
+    void logAiServiceCall_NlpResult_TokensExtracted() throws Throwable {
+        // Given
+        FakeOpenAIClient target = new FakeOpenAIClient();
+        NlpResult nlpResult = NlpResult.builder()
+                .refinedText("변환된 텍스트")
+                .summary("요약")
+                .processingTimeMs(150)
+                .status("SUCCESS")
+                .promptTokens(120)
+                .completionTokens(80)
+                .totalTokens(200)
+                .build();
+        when(joinPoint.getTarget()).thenReturn(target);
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getName()).thenReturn("processText");
+        when(joinPoint.proceed()).thenReturn(nlpResult);
+
+        // When
+        aiSvcLogAspect.logAiServiceCall(joinPoint);
+
+        // Then
+        ArgumentCaptor<TbAiSvcLog> logCaptor = ArgumentCaptor.forClass(TbAiSvcLog.class);
+        verify(aiSvcLogService, times(1)).saveLog(logCaptor.capture());
+
+        TbAiSvcLog savedLog = logCaptor.getValue();
+        assertEquals("NLP", savedLog.getSvcType());
+        assertEquals(120, savedLog.getPromptTokens());
+        assertEquals(80, savedLog.getCompletionTokens());
+        assertEquals(200, savedLog.getTotalTokens());
+    }
+
+    @Test
+    @DisplayName("Translation 호출 결과에서 토큰 사용량 및 resSize 추출 검증")
+    void logAiServiceCall_TranslationResult_TokensAndSizeExtracted() throws Throwable {
+        // Given
+        FakeTranslatorClient target = new FakeTranslatorClient();
+        TranslationResult trResult = TranslationResult.builder()
+                .translations(Map.of("ko", "번역된텍스트", "en", "TranslatedText"))
+                .processingTimeMs(200)
+                .status("SUCCESS")
+                .promptTokens(50)
+                .completionTokens(30)
+                .totalTokens(80)
+                .build();
+        when(joinPoint.getTarget()).thenReturn(target);
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getName()).thenReturn("translate");
+        when(joinPoint.proceed()).thenReturn(trResult);
+
+        // When
+        aiSvcLogAspect.logAiServiceCall(joinPoint);
+
+        // Then
+        ArgumentCaptor<TbAiSvcLog> logCaptor = ArgumentCaptor.forClass(TbAiSvcLog.class);
+        verify(aiSvcLogService, times(1)).saveLog(logCaptor.capture());
+
+        TbAiSvcLog savedLog = logCaptor.getValue();
+        assertEquals("TRANSLATE", savedLog.getSvcType());
+        assertEquals(50, savedLog.getPromptTokens());
+        assertEquals(30, savedLog.getCompletionTokens());
+        assertEquals(80, savedLog.getTotalTokens());
+        assertNotNull(savedLog.getResSize());
+        assertTrue(savedLog.getResSize() > 0);
+    }
+
+    @Test
+    @DisplayName("토큰이 없는 일반 결과는 토큰 필드가 null로 기록 검증")
+    void logAiServiceCall_GenericResult_TokensNull() throws Throwable {
+        // Given
+        FakeSpeechClient target = new FakeSpeechClient();
+        when(joinPoint.getTarget()).thenReturn(target);
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getName()).thenReturn("recognize");
+        when(joinPoint.proceed()).thenReturn("일반 결과 문자열");
+
+        // When
+        aiSvcLogAspect.logAiServiceCall(joinPoint);
+
+        // Then
+        ArgumentCaptor<TbAiSvcLog> logCaptor = ArgumentCaptor.forClass(TbAiSvcLog.class);
+        verify(aiSvcLogService, times(1)).saveLog(logCaptor.capture());
+
+        TbAiSvcLog savedLog = logCaptor.getValue();
+        assertNull(savedLog.getPromptTokens());
+        assertNull(savedLog.getCompletionTokens());
+        assertNull(savedLog.getTotalTokens());
+        assertNotNull(savedLog.getResSize());
     }
 }

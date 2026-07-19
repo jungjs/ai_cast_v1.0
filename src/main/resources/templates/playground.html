@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('AI Cast Playground', ~{::div})}">
+<div>
+    <link rel="stylesheet" th:href="@{/css/playground.css}">
+
+    <!-- Gov Selector -->
+    <div class="glass-card gov-selector-bar">
+        <label for="gov-select" class="gov-label">지자체 선택</label>
+        <select id="gov-select" class="form-control gov-select">
+            <option value="">-- 지자체를 선택하세요 --</option>
+            <option th:each="gov : ${govList}" 
+                    th:value="${gov.apiKey}" 
+                    th:text="${gov.govName}"
+                    th:data-gov-id="${gov.id}"></option>
+        </select>
+        <span class="gov-badge" id="gov-badge"></span>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="glass-card tab-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="audio">
+                <span class="tab-icon">🎤</span> 음성 (STT)
+            </button>
+            <button class="tab-btn" data-tab="text">
+                <span class="tab-icon">📝</span> 텍스트 (NLP)
+            </button>
+            <button class="tab-btn" data-tab="image">
+                <span class="tab-icon">🖼️</span> 이미지 (OCR)
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="tab-panels">
+
+        <!-- Audio Tab -->
+        <div class="tab-panel active" id="panel-audio">
+            <div class="glass-card panel-card">
+                <h2>음성 파일 업로드</h2>
+                <p class="panel-desc">음성 파일(.wav, .mp3)을 업로드하면 STT → NLP → 번역 파이프라인이 실행됩니다.</p>
+                
+                <div class="upload-area" id="audio-drop-zone">
+                    <div class="upload-icon">🎤</div>
+                    <p>파일을 여기에 끌어다 놓거나 클릭하여 선택</p>
+                    <input type="file" id="audio-file-input" accept=".wav,.mp3,.ogg,.m4a" hidden>
+                </div>
+                <div class="file-info hidden" id="audio-file-info">
+                    <span class="file-name"></span>
+                    <button class="btn-secondary btn-sm" id="audio-file-remove">✕</button>
+                </div>
+
+                <div class="form-group">
+                    <label>대상 언어</label>
+                    <div class="lang-chips" id="audio-lang-chips">
+                        <label class="chip"><input type="checkbox" value="en" checked> 영어</label>
+                        <label class="chip"><input type="checkbox" value="ja" checked> 일본어</label>
+                        <label class="chip"><input type="checkbox" value="zh-Hans"> 중국어</label>
+                        <label class="chip"><input type="checkbox" value="vi"> 베트남어</label>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-block" id="btn-audio-submit" disabled>파이프라인 실행</button>
+            </div>
+        </div>
+
+        <!-- Text Tab -->
+        <div class="tab-panel" id="panel-text">
+            <div class="glass-card panel-card">
+                <h2>텍스트 파일 업로드 또는 직접 입력</h2>
+                <p class="panel-desc">텍스트 파일(.txt, .md)을 업로드하거나 직접 텍스트를 입력하면 NLP → 번역 파이프라인이 실행됩니다.</p>
+                
+                <div class="upload-area" id="text-drop-zone">
+                    <div class="upload-icon">📄</div>
+                    <p>텍스트 파일을 여기에 끌어다 놓거나 클릭하여 가져오기</p>
+                    <input type="file" id="text-file-input" accept=".txt,.md" hidden>
+                </div>
+                <div class="file-info hidden" id="text-file-info">
+                    <span class="file-name"></span>
+                    <button class="btn-secondary btn-sm" id="text-file-remove">✕</button>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="text-input" class="form-control textarea-lg" 
+                              placeholder="분석할 텍스트를 직접 입력하거나 파일을 업로드하세요..." 
+                              rows="6"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>대상 언어</label>
+                    <div class="lang-chips" id="text-lang-chips">
+                        <label class="chip"><input type="checkbox" value="en" checked> 영어</label>
+                        <label class="chip"><input type="checkbox" value="ja" checked> 일본어</label>
+                        <label class="chip"><input type="checkbox" value="zh-Hans"> 중국어</label>
+                        <label class="chip"><input type="checkbox" value="vi"> 베트남어</label>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-block" id="btn-text-submit" disabled>파이프라인 실행</button>
+            </div>
+        </div>
+
+        <!-- Image Tab -->
+        <div class="tab-panel" id="panel-image">
+            <div class="glass-card panel-card">
+                <h2>이미지 파일 업로드</h2>
+                <p class="panel-desc">이미지 파일(.png, .jpg)을 업로드하면 OCR → NLP → 번역 파이프라인이 실행됩니다.</p>
+
+                <div class="upload-area" id="image-drop-zone">
+                    <div class="upload-icon">🖼️</div>
+                    <p>파일을 여기에 끌어다 놓거나 클릭하여 선택</p>
+                    <input type="file" id="image-file-input" accept=".png,.jpg,.jpeg,.bmp" hidden>
+                </div>
+                <div class="file-info hidden" id="image-file-info">
+                    <span class="file-name"></span>
+                    <button class="btn-secondary btn-sm" id="image-file-remove">✕</button>
+                </div>
+
+                <div class="form-group">
+                    <label>대상 언어</label>
+                    <div class="lang-chips" id="image-lang-chips">
+                        <label class="chip"><input type="checkbox" value="en" checked> 영어</label>
+                        <label class="chip"><input type="checkbox" value="ja" checked> 일본어</label>
+                        <label class="chip"><input type="checkbox" value="zh-Hans"> 중국어</label>
+                        <label class="chip"><input type="checkbox" value="vi"> 베트남어</label>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-block" id="btn-image-submit" disabled>파이프라인 실행</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Area -->
+    <div class="glass-card result-container hidden" id="result-area" style="display: none;">
+        <div class="result-header">
+            <h2>파이프라인 실행 결과</h2>
+            <div class="result-meta">
+                <span class="badge" id="result-status"></span>
+                <span class="result-time" id="result-time"></span>
+            </div>
+        </div>
+
+        <!-- Processing Times -->
+        <div class="processing-times" id="processing-times"></div>
+
+        <!-- Results Grid -->
+        <div class="result-grid">
+            <div class="result-section" id="result-original">
+                <h3>원본 텍스트</h3>
+                <div class="result-body" id="original-text"></div>
+            </div>
+            <div class="result-section" id="result-refined">
+                <h3>NLP 정제 결과</h3>
+                <div class="result-body" id="refined-text"></div>
+            </div>
+            <div class="result-section" id="result-summary">
+                <h3>요약</h3>
+                <div class="result-body" id="summary-text"></div>
+            </div>
+            <div class="result-section" id="result-translations">
+                <h3>번역 결과</h3>
+                <div class="result-body" id="translations-body"></div>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div class="error-box hidden" id="result-error">
+            <span class="error-icon">⚠️</span>
+            <span id="error-message"></span>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-msg">파이프라인 실행 중...</p>
+    </div>
+
+    <script th:src="@{/js/playground.js}"></script>
+</div>
+</html>

@@ -70,10 +70,28 @@ public class AzureTranslatorClient implements TranslateClient {
                 cacheService.put(sourceText, targetLang, translated);
                 translations.put(targetLang, translated);
             }
-            return new TranslationResult(translations, System.currentTimeMillis() - startTime, "SUCCESS");
+            int promptT = sourceText != null ? sourceText.length() : 0;
+            int completionT = translations.values().stream()
+                    .filter(Objects::nonNull)
+                    .mapToInt(String::length)
+                    .sum();
+            int totalT = promptT + completionT;
+
+            return TranslationResult.builder()
+                    .translations(translations)
+                    .processingTimeMs(System.currentTimeMillis() - startTime)
+                    .status("SUCCESS")
+                    .promptTokens(promptT)
+                    .completionTokens(completionT)
+                    .totalTokens(totalT)
+                    .build();
         } catch (Exception e) {
             log.error("번역 API 호출 실패: {}", e.getMessage(), e);
-            return new TranslationResult(translations, System.currentTimeMillis() - startTime, "FAILED: " + e.getMessage());
+            return TranslationResult.builder()
+                    .translations(translations)
+                    .processingTimeMs(System.currentTimeMillis() - startTime)
+                    .status("FAILED: " + e.getMessage())
+                    .build();
         }
     }
 

@@ -39,4 +39,10 @@ public class StatsController {
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(statsService.getMonthlyStats(govId, startDate, endDate));
     }
+
+    @PostMapping("/aggregate/today")
+    public ResponseEntity<String> forceAggregateToday() {
+        statsService.aggregateTodayStats();
+        return ResponseEntity.ok("Successfully aggregated today's stats!");
+    }
 }

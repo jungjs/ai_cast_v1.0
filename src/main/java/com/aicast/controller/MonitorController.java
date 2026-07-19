@@ -30,11 +30,9 @@ public class MonitorController {
     public ResponseEntity<List<Map<String, Object>>> getApiStatus() {
         // v_api_stat 뷰를 조회하여 최근 API 호출 현황 반환 (최근 1일)
         String sql = """
-            SELECT gov_id, req_path, SUM(tot_cnt) as tot_cnt, 
-                   SUM(ok_cnt) as ok_cnt, SUM(fail_cnt) as fail_cnt 
+            SELECT gov_name, api_key, tot_req, ok_cnt, fail_cnt 
             FROM v_api_stat 
-            WHERE call_dt = CURRENT_DATE 
-            GROUP BY gov_id, req_path
+            WHERE stat_dt = CURRENT_DATE
         """;
         List<Map<String, Object>> statusList = jdbcTemplate.queryForList(sql);
         return ResponseEntity.ok(statusList);

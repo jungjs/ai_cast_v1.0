@@ -3,8 +3,23 @@ const StorageKey = "aicast_api_key";
 // DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
     initApiKeyModal();
-    checkApiKey();
+    if (window.location.pathname !== "/playground") {
+        checkApiKey();
+    }
+    initActiveNavLink();
 });
+
+function initActiveNavLink() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll(".nav-links a").forEach(link => {
+        const href = link.getAttribute("href");
+        if (currentPath === href || (href === "/dashboard" && currentPath === "/")) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
+}
 
 function initApiKeyModal() {
     const modal = document.getElementById("apiKeyModal");
@@ -39,6 +54,7 @@ function initApiKeyModal() {
 }
 
 function checkApiKey() {
+    if (window.location.pathname === "/playground") return;
     const key = localStorage.getItem(StorageKey);
     if (!key) {
         document.getElementById("apiKeyModal").classList.remove("hidden");
@@ -50,8 +66,8 @@ function getApiKey() {
 }
 
 // Custom Fetch with API Key Header
-async function fetchWithAuth(url, options = {}) {
-    const key = getApiKey();
+async function fetchWithAuth(url, options = {}, customKey = null) {
+    const key = customKey || getApiKey();
     const headers = {
         ...options.headers,
         "X-API-KEY": key

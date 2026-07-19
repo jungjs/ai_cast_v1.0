@@ -40,4 +40,13 @@ public class TbAiSvcStat {
 
     @Column(name = "avg_ms", nullable = false)
     private Integer avgMs = 0;
+
+    @Column(name = "tot_tokens")
+    private Integer totTokens = 0;
+
+    @Column(name = "prompt_tokens")
+    private Integer promptTokens = 0;
+
+    @Column(name = "completion_tokens")
+    private Integer completionTokens = 0;
 }

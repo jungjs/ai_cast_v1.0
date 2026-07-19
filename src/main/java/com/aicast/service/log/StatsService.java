@@ -32,7 +32,8 @@ public class StatsService {
 
         String sql = """
             INSERT INTO tb_ai_svc_stat 
-                (stat_dt, api_key, gov_name, svc_type, tot_cnt, ok_cnt, fail_cnt, avg_ms)
+                (stat_dt, api_key, gov_name, svc_type, tot_cnt, ok_cnt, fail_cnt, avg_ms,
+                 tot_tokens, prompt_tokens, completion_tokens)
             SELECT 
                 CAST(? AS DATE),
                 l.api_key,
@@ -41,7 +42,10 @@ public class StatsService {
                 COUNT(*),
                 COUNT(CASE WHEN l.is_ok = TRUE THEN 1 END),
                 COUNT(CASE WHEN l.is_ok = FALSE THEN 1 END),
-                COALESCE(AVG(l.proc_ms), 0)
+                COALESCE(AVG(l.proc_ms), 0),
+                COALESCE(SUM(l.total_tokens), 0),
+                COALESCE(SUM(l.prompt_tokens), 0),
+                COALESCE(SUM(l.completion_tokens), 0)
             FROM tb_ai_svc_log l
             JOIN gov_list g ON l.api_key = g.api_key
             WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
@@ -56,7 +60,57 @@ public class StatsService {
         }
     }
 
+    @Transactional
+    public void aggregateTodayStats() {
+        LocalDate today = LocalDate.now();
+        log.info("Starting manual stats aggregation for today ({})", today);
+        
+        jdbcTemplate.update("DELETE FROM tb_ai_svc_stat WHERE stat_dt = ?", today.toString());
+
+        String sql = """
+            INSERT INTO tb_ai_svc_stat 
+                (stat_dt, api_key, gov_name, svc_type, tot_cnt, ok_cnt, fail_cnt, avg_ms,
+                 tot_tokens, prompt_tokens, completion_tokens)
+            SELECT 
+                CAST(? AS DATE),
+                l.api_key,
+                g.name,
+                l.svc_type,
+                COUNT(*),
+                COUNT(CASE WHEN l.is_ok = TRUE THEN 1 END),
+                COUNT(CASE WHEN l.is_ok = FALSE THEN 1 END),
+                COALESCE(AVG(l.proc_ms), 0),
+                COALESCE(SUM(l.total_tokens), 0),
+                COALESCE(SUM(l.prompt_tokens), 0),
+                COALESCE(SUM(l.completion_tokens), 0)
+            FROM tb_ai_svc_log l
+            JOIN gov_list g ON l.api_key = g.api_key
+            WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
+            GROUP BY l.api_key, l.svc_type
+        """;
+
+        try {
+            int insertedCount = jdbcTemplate.update(sql, today.toString(), today.toString());
+            log.info("Today's stats aggregation completed. {} rows inserted.", insertedCount);
+        } catch (Exception e) {
+            log.error("Failed to aggregate daily stats for {}", today, e);
+        }
+    }
+
     public List<Map<String, Object>> getDailyStats(String govId, LocalDate date) {
+        if ("ALL".equalsIgnoreCase(govId)) {
+            String sql = """
+                SELECT stat_dt, svc_type, 
+                       SUM(tot_cnt) as tot_cnt, SUM(ok_cnt) as ok_cnt, SUM(fail_cnt) as fail_cnt, 
+                       AVG(avg_ms) as avg_ms, SUM(tot_tokens) as tot_tokens, 
+                       SUM(prompt_tokens) as prompt_tokens, SUM(completion_tokens) as completion_tokens
+                FROM tb_ai_svc_stat
+                WHERE stat_dt = ?
+                GROUP BY svc_type
+            """;
+            return jdbcTemplate.queryForList(sql, date.toString());
+        }
+
         String sql = """
             SELECT s.* 
             FROM tb_ai_svc_stat s
@@ -73,8 +127,20 @@ public class StatsService {
     }
 
     public List<Map<String, Object>> getWeeklyStats(String govId, LocalDate weekStart, LocalDate weekEnd) {
+        if ("ALL".equalsIgnoreCase(govId)) {
+            String sql = """
+                SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                       SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
+                FROM tb_ai_svc_stat s
+                WHERE s.stat_dt BETWEEN ? AND ?
+                GROUP BY s.svc_type
+            """;
+            return jdbcTemplate.queryForList(sql, weekStart.toString(), weekEnd.toString());
+        }
+
         String sql = """
-            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt
+            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                   SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
             FROM tb_ai_svc_stat s
             JOIN gov_list g ON s.api_key = g.api_key
             WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?
@@ -90,8 +156,20 @@ public class StatsService {
     }
 
     public List<Map<String, Object>> getMonthlyStats(String govId, LocalDate monthStart, LocalDate monthEnd) {
+        if ("ALL".equalsIgnoreCase(govId)) {
+            String sql = """
+                SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                       SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
+                FROM tb_ai_svc_stat s
+                WHERE s.stat_dt BETWEEN ? AND ?
+                GROUP BY s.svc_type
+            """;
+            return jdbcTemplate.queryForList(sql, monthStart.toString(), monthEnd.toString());
+        }
+
         String sql = """
-            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt
+            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                   SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
             FROM tb_ai_svc_stat s
             JOIN gov_list g ON s.api_key = g.api_key
             WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?

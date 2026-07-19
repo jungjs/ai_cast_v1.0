@@ -9,19 +9,33 @@
 
 ### 👤 Dave - 사용 모델: DeepSeek V4 Flash
 - [x] **T-14. testdata-generator Maven 독립 프로젝트 초기화**
-  - 메인 프로그램과 완전히 독립된 디렉토리인 `testdata-generator/`를 신설하고 `pom.xml`을 생성합니다.
-  - 빌드 및 실행을 위한 최소한의 라이브러리(Azure Speech SDK, Lombok, JUnit5)만을 세팅합니다.
 - [x] **T-15. 마크다운 파서 및 Azure TTS 연동 컴포넌트 개발**
-  - [TtsClient.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/client/TtsClient.java)를 구현하여 Azure Text-to-Speech(TTS) API를 활용해 본문 텍스트를 고품질 한국어 음성(`.wav`)으로 변환 및 저장하는 기능을 개발합니다.
-  - 마크다운 파서 모듈을 구현하여 `AI_Cast/docs/80_RawData/마을방송테스트문구.md` 파일로부터 각 시나리오의 [제목] 및 [본문]을 추출하고, 제목에서 특수기호를 제거해 안전한 파일명으로 매핑하는 정규식 추출 로직을 구축합니다.
+- [x] **T-18. 토큰/사용량 테이블 스키마 마이그레이션**
+- [x] **T-19. JPA Domain Entity 수정 및 필드 추가**
+- [x] **T-20. DTO 및 AI 클라이언트 사용량 수집 구현**
+- [x] **T-24. WebController에 Playground 페이지 엔드포인트 매핑 추가**
+- [x] **T-25. 네비게이션 레이아웃 메뉴 추가 및 common.js 라우팅 추가**
+- [x] **T-29. WebController 보완 및 활성 지자체 모델 연동**
+- [x] **T-33. WebController의 /stats 엔드포인트 지자체 리스트 주입**
+  - [WebController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/WebController.java)의 `stats()` 메소드를 수정하여 `Model`에 활성 지자체 목록 `"govList"`를 바인딩하여 반환하게 수정합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-16. Java AWT 기반 카드뉴스 이미지 렌더러 개발**
-  - [ImageRenderer.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/engine/ImageRenderer.java)를 구현하여 Java 표준 AWT Graphics2D 환경을 기반으로 800x800 규격의 카드 뉴스 PNG 이미지를 렌더링하고 내보내는 엔진을 개발합니다.
-  - 제목 텍스트에 포함된 키워드(예: '폭염', '태풍', '산불' 등)에 따라 재난(Red/Orange) 또는 일반안내(Blue/Green)의 적절한 카드 배경 테마 컬러를 맵핑하고 본문 텍스트를 줄바꿈하여 카드 중심에 출력하는 렌더링 로직을 개발합니다.
 - [x] **T-17. TestDataGenerator 메인 오케스트레이터 및 연동 검증**
-  - [TestDataGenerator.java](file:///e:/%EB%AA%A8%EB%B9%8C%EB%A6%AC%ED%8B%B0%EC%82%AC%EC%97%85%EB%B3%B8%EB%B6%80/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/2026/vibe%20coding/workspace/testdata-generator/src/main/java/com/aicast/tool/TestDataGenerator.java) 메인 진입점을 개발하여 환경설정 파일 로드, 마크다운 파싱, TTS 및 이미지 렌더러 파이프라인 연동을 유기적으로 제어합니다.
-  - 생성된 18쌍의 결과물(.wav, .png)이 `AI_Cast/docs/80_RawData/testdata/` 디렉토리 하위에 정상 생성되는지 검증하고 단위 테스트 코드를 작성합니다.
+- [x] **T-21. AOP 로깅 Aspect 수정**
+- [x] **T-22. 일별 통계 집계 배치 서비스 수정**
+- [x] **T-23. 로컬 단위 테스트 및 E2E 통합 테스트 수행**
+- [x] **T-26. playground.html 템플릿 마크업 작성**
+- [x] **T-27. playground.js 비즈니스 로직 구현**
+- [x] **T-30. playground.html 지자체 선택 드롭다운 마크업 보완**
+- [x] **T-31. playground.js 동적 API Key 연동 스크립트 보완**
+- [x] **T-34. stats.html 지자체 렌더링 마크업 보완 및 stats.js 조회 파라미터 동적 연동**
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 `#govFilter` 내 하드코딩된 `<option>` 목록을 삭제하고 `th:each` 문법을 사용해 지자체 정보(ID, 명칭)가 출력되도록 동적 템플릿 마크업을 개발합니다.
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)에서 지자체 필터 변경 시 자동으로 `loadStats()` 조회를 다시 호출하도록 이벤트를 연동하고, 호출 파라미터 `govId`에 선택된 지자체 ID 값이 바인딩되어 날아가도록 수정합니다.
+
+### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)
+- [x] **T-35. 최종 E2E 검증 및 로컬 서버 컴파일 반영**
+  - 로컬 서버 컴파일 기동 후 통계 화면에서 실제 DB 지자체 목록이 미려하게 로딩되는지 확인하고, 조회 시 정상 집계 데이터가 노출되는지 확인합니다.
 
 ---
 

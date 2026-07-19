@@ -10,4 +10,7 @@ public interface GovListRepository extends JpaRepository<GovList, String> {
 
     // API Key로 지자체 정보 조회 (인증용)
     Optional<GovList> findByApiKeyAndIsActiveTrue(String apiKey);
+
+    // 활성화된 지자체 전체 조회
+    java.util.List<GovList> findByIsActiveTrue();
 }

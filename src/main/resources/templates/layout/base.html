@@ -10,6 +10,14 @@
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <!-- DataTables CSS (optional for stats) -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
+    <!-- Common JS Libraries (Head loaded to prevent ReferenceErrors in view-level scripts) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script th:src="@{/js/common.js}"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
 
@@ -20,8 +28,9 @@
             <span class="logo-text">AI Cast</span>
         </div>
         <nav class="nav-links">
-            <a th:href="@{/dashboard}" th:classappend="${#httpServletRequest.requestURI == '/dashboard' || #httpServletRequest.requestURI == '/' ? 'active' : ''}">대시보드</a>
-            <a th:href="@{/stats}" th:classappend="${#httpServletRequest.requestURI == '/stats' ? 'active' : ''}">통계</a>
+            <a th:href="@{/dashboard}">대시보드</a>
+            <a th:href="@{/stats}">통계</a>
+            <a th:href="@{/playground}">플레이그라운드</a>
         </nav>
         <div class="nav-user">
             <button id="btn-api-key" class="btn-outline">API Key 인증</button>
@@ -48,14 +57,5 @@
     <!-- Toast Notification -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Common JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script th:src="@{/js/common.js}"></script>
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    
 </body>
 </html>

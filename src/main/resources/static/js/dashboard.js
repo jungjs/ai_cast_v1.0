@@ -8,8 +8,7 @@ let cpuChart, memChart, netChart, diskChart;
 
 window.onApiKeyChanged = () => {
     // API Key 변경 시 초기 데이터 강제 로드
-    fetchResources();
-    // API 현황 통계가 구현되어 있다면 여기 추가
+    loadInitialData();
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -17,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 폴링 시작 (API Key 있을 때만)
     if(getApiKey()) {
-        fetchResources();
-        setInterval(fetchResources, 5000); // 5초
+        loadInitialData();
+        setInterval(fetchLatestResource, 5000); // 5초
     }
 });
 
@@ -73,39 +72,88 @@ function initCharts() {
     });
 }
 
-async function fetchResources() {
+async function loadInitialData() {
+    try {
+        const res = await fetchWithAuth('/api/monitor/resources?limit=60');
+        const data = await res.json();
+        
+        if(data && data.length > 0) {
+            // 과거 데이터부터 차트에 밀어 넣기 위해 reverse 정렬
+            const sortedData = [...data].reverse();
+            
+            // 데이터 클리어 후 재매핑
+            cpuChart.data.labels = [];
+            cpuChart.data.datasets[0].data = [];
+            memChart.data.labels = [];
+            memChart.data.datasets[0].data = [];
+            netChart.data.labels = [];
+            netChart.data.datasets[0].data = [];
+            diskChart.data.labels = [];
+            diskChart.data.datasets[0].data = [];
+
+            sortedData.forEach(item => {
+                const timeLabel = new Date(item.chk_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                
+                cpuChart.data.labels.push(timeLabel);
+                cpuChart.data.datasets[0].data.push(item.cpu_pct || 0);
+
+                memChart.data.labels.push(timeLabel);
+                memChart.data.datasets[0].data.push(item.mem_mb || 0);
+
+                netChart.data.labels.push(timeLabel);
+                netChart.data.datasets[0].data.push(item.net_rx || 0);
+
+                diskChart.data.labels.push(timeLabel);
+                diskChart.data.datasets[0].data.push(item.disk_rd || 0);
+            });
+
+            cpuChart.update();
+            memChart.update();
+            netChart.update();
+            diskChart.update();
+
+            const latest = data[0]; // DESC 정렬이므로 0번째가 최신
+            updateBadges(latest);
+            updateAlertBanner(latest);
+        }
+    } catch(e) {
+        console.error("Failed to load initial resources", e);
+    }
+}
+
+async function fetchLatestResource() {
     try {
         const res = await fetchWithAuth('/api/monitor/resources?limit=1');
         const data = await res.json();
         
         if(data && data.length > 0) {
-            updateCharts(data[0]);
-            updateAlertBanner(data[0]);
+            const latest = data[0];
+            const timeLabel = new Date(latest.chk_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+            function pushData(chart, val) {
+                chart.data.labels.push(timeLabel);
+                chart.data.datasets[0].data.push(val);
+                if (chart.data.labels.length > MAX_DATA_POINTS) {
+                    chart.data.labels.shift();
+                    chart.data.datasets[0].data.shift();
+                }
+                chart.update();
+            }
+
+            pushData(cpuChart, latest.cpu_pct || 0);
+            pushData(memChart, latest.mem_mb || 0);
+            pushData(netChart, latest.net_rx || 0);
+            pushData(diskChart, latest.disk_rd || 0);
+
+            updateBadges(latest);
+            updateAlertBanner(latest);
         }
     } catch(e) {
-        // 인증 실패 등 에러 무시 (콘솔 로깅)
+        console.error("Failed to fetch latest resource", e);
     }
 }
 
-function updateCharts(latest) {
-    const timeLabel = new Date().toLocaleTimeString();
-
-    function pushData(chart, val) {
-        chart.data.labels.push(timeLabel);
-        chart.data.datasets[0].data.push(val);
-        if (chart.data.labels.length > MAX_DATA_POINTS) {
-            chart.data.labels.shift();
-            chart.data.datasets[0].data.shift();
-        }
-        chart.update();
-    }
-
-    pushData(cpuChart, latest.cpu_pct || 0);
-    pushData(memChart, latest.mem_mb || 0);
-    pushData(netChart, latest.net_rx || 0);
-    pushData(diskChart, latest.disk_rd || 0);
-
-    // Update Badges
+function updateBadges(latest) {
     const cpuBadge = document.getElementById('cpu-badge');
     cpuBadge.textContent = `${(latest.cpu_pct||0).toFixed(1)}%`;
     if(latest.cpu_pct >= 90) cpuBadge.className = 'badge crit';

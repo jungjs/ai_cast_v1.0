@@ -45,6 +45,15 @@ public class TbAiSvcLog {
     @Column(name = "err_msg", columnDefinition = "TEXT")
     private String errMsg;
 
+    @Column(name = "prompt_tokens")
+    private Integer promptTokens;
+
+    @Column(name = "completion_tokens")
+    private Integer completionTokens;
+
+    @Column(name = "total_tokens")
+    private Integer totalTokens;
+
     @PrePersist
     public void prePersist() {
         if (this.reqTime == null) {

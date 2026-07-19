@@ -34,6 +34,14 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(correlationId, e.getMessage()));
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException e) {
+        String correlationId = MDC.get("correlationId");
+        log.warn("Resource Not Found - path: {}, correlationId: {}", e.getResourcePath(), correlationId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(correlationId, "요청한 리소스를 찾을 수 없습니다."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
         String correlationId = MDC.get("correlationId");

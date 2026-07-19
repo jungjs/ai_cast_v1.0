@@ -21,11 +21,10 @@
                 <option value="OCR">OCR</option>
                 <option value="IMAGE_GEN">IMAGE_GEN</option>
             </select>
-            <!-- 관리자 전용 지자체 필터 (Mock) -->
-            <select id="govFilter" class="form-control select-filter hidden">
+            <!-- 지자체 필터 (DB 연동) -->
+            <select id="govFilter" class="form-control select-filter">
                 <option value="ALL">전체 지자체</option>
-                <option value="gov-1">서울시</option>
-                <option value="gov-2">부산시</option>
+                <option th:each="gov : ${govList}" th:value="${gov.id}" th:text="${gov.govName}"></option>
             </select>
             <button id="btnSearch" class="btn-primary">조회</button>
         </div>
@@ -95,6 +94,7 @@
                     <th>실패</th>
                     <th>성공률</th>
                     <th>평균(ms)</th>
+                    <th>사용량</th>
                 </tr>
             </thead>
             <tbody>

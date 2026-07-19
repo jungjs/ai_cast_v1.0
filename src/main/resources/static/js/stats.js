@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initTable();
     
     document.getElementById("btnSearch").addEventListener("click", loadStats);
+    document.getElementById("govFilter").addEventListener("change", loadStats);
 
     if(getApiKey()) {
         loadStats();
@@ -95,7 +96,8 @@ async function loadStats() {
     const dateVal = document.getElementById('dateInput').value;
     if(!dateVal) return;
 
-    let url = `/api/stats/${activeTab}?govId=ALL`;
+    const govId = document.getElementById('govFilter').value || 'ALL';
+    let url = `/api/stats/${activeTab}?govId=${govId}`;
     if(activeTab === 'daily') url += `&date=${dateVal}`;
     else url += `&startDate=${dateVal}&endDate=${dateVal}`; // 단순화를 위해 동일일자 전송 (실제로는 주/월 계산 필요)
 
@@ -174,9 +176,25 @@ function updateTable(data) {
             (d.ok_cnt||0).toLocaleString(),
             (d.fail_cnt||0).toLocaleString(),
             `${rate}%`,
-            `${d.avg_ms||0}`
+            `${d.avg_ms||0}`,
+            formatUsage(d.svc_type, d.tot_tokens)
         ]);
     });
     
     dataTable.draw();
 }
+
+function formatUsage(svcType, totTokens) {
+    if (totTokens === undefined || totTokens === null || totTokens === 0) return '-';
+    const formatted = totTokens.toLocaleString();
+    if (svcType === 'NLP') return `${formatted} 토큰`;
+    if (svcType === 'TRANSLATE') return `${formatted} 자`;
+    if (svcType === 'STT' || svcType === 'OCR') return `${formatted} 자`;
+    if (svcType === 'STORAGE') {
+        if (totTokens >= 1024 * 1024) return `${(totTokens / (1024 * 1024)).toFixed(1)} MB`;
+        if (totTokens >= 1024) return `${(totTokens / 1024).toFixed(1)} KB`;
+        return `${formatted} B`;
+    }
+    return formatted;
+}
+
