@@ -59,6 +59,8 @@
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 신규 경로에 Maven 빌드와 Azure App Service 배포를 일련으로 수행하는 YAML 코드를 작성합니다.
 - [x] **T-63. GitHub Actions 내 Azure App Name 불일치 오류 픽스**
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 파일의 `app-name` 설정을 실물 리소스 명칭인 `aicast-smarti-dev-new` 로 올바르게 교정합니다.
+- [x] **T-64. GitHub Actions 플러그인 메이저 버전 최신 격상 (Node 24 호환)**
+  - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 내의 checkout, setup-java, upload/download-artifact, webapps-deploy 등의 패키지 버전을 최신으로 업그레이드합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
