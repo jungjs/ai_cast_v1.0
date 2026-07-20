@@ -136,27 +136,15 @@ table.dataTable tbody tr:hover {
 .stats-section-title {
     font-size: 1.2rem;
     font-weight: 700;
-    margin: 1.5rem 0 1rem 0;
+    margin: 2rem 0 1rem 0;
     color: var(--text-primary);
     border-left: 4px solid var(--primary);
     padding-left: 0.5rem;
 }
 
-/* Tables Split Layout (Two columns layout for API and AI stats tables) */
-.tables-split-layout {
-    display: flex;
-    gap: 1.5rem;
+/* Full Width Table Containers */
+.full-width-table {
     width: 100%;
     margin-bottom: 2rem;
-}
-
-.table-container.half-width {
-    flex: 1;
-    min-width: 0;
-}
-
-@media (max-width: 1200px) {
-    .tables-split-layout {
-        flex-direction: column;
-    }
+    padding: 1.5rem;
 }
