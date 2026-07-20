@@ -63,6 +63,8 @@
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 내의 checkout, setup-java, upload/download-artifact, webapps-deploy 등의 패키지 버전을 최신으로 업그레이드합니다.
 - [x] **T-65. 구형 Container Apps 배포용 deploy.yml 파일 삭제 정리**
   - [.github/workflows/deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/deploy.yml) 파일을 삭제하여 불필요한 이중 트리거 및 버전 Deprecated 장애를 제거합니다.
+- [x] **T-66. OneDeploy 400 에러 극복을 위한 단일 JAR 파일 대상 강제 한정 패치**
+  - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 파일 내의 `Upload Artifact` 경로 및 배포 `package` 파라미터를 단일 고정 파일인 `ai_cast-1.0.0-SNAPSHOT.jar` 로 교정합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
