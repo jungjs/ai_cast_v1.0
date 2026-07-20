@@ -28,7 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
 window.onApiKeyChanged = () => loadStats();
 
 function initDateInput() {
-    document.getElementById('dateInput').valueAsDate = new Date();
+    const startInput = document.getElementById('startDateInput');
+    const endInput = document.getElementById('endDateInput');
+    if (startInput && endInput) {
+        const today = new Date();
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(today.getDate() - 30);
+        
+        startInput.valueAsDate = oneMonthAgo;
+        endInput.valueAsDate = today;
+    }
 }
 
 function initTabs() {
@@ -37,9 +46,27 @@ function initTabs() {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             activeTab = e.target.dataset.tab;
+            
+            toggleDateInputs();
             loadStats();
         });
     });
+    
+    toggleDateInputs();
+}
+
+function toggleDateInputs() {
+    const endInput = document.getElementById('endDateInput');
+    const sep = document.getElementById('dateRangeSeparator');
+    if (endInput && sep) {
+        if (activeTab === 'daily') {
+            endInput.style.display = 'none';
+            sep.style.display = 'none';
+        } else {
+            endInput.style.display = 'inline-block';
+            sep.style.display = 'inline-block';
+        }
+    }
 }
 
 function initCharts() {
@@ -93,13 +120,18 @@ function initTable() {
 }
 
 async function loadStats() {
-    const dateVal = document.getElementById('dateInput').value;
-    if(!dateVal) return;
+    const startDateVal = document.getElementById('startDateInput').value;
+    const endDateVal = document.getElementById('endDateInput').value;
+    if(!startDateVal) return;
 
     const govId = document.getElementById('govFilter').value || 'ALL';
     let url = `/api/stats/${activeTab}?govId=${govId}`;
-    if(activeTab === 'daily') url += `&date=${dateVal}`;
-    else url += `&startDate=${dateVal}&endDate=${dateVal}`; // 단순화를 위해 동일일자 전송 (실제로는 주/월 계산 필요)
+    if(activeTab === 'daily') {
+        url += `&date=${startDateVal}`;
+    } else {
+        if(!endDateVal) return;
+        url += `&startDate=${startDateVal}&endDate=${endDateVal}`;
+    }
 
     try {
         const res = await fetchWithAuth(url);

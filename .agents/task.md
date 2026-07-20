@@ -8,30 +8,15 @@
 ## 👥 에이전트별 태스크 할당
 
 ### 👤 Dave - 사용 모델: DeepSeek V4 Flash
-- [x] **T-14. testdata-generator Maven 독립 프로젝트 초기화**
-- [x] **T-15. 마크다운 파서 및 Azure TTS 연동 컴포넌트 개발**
-- [x] **T-18. 토큰/사용량 테이블 스키마 마이그레이션**
-- [x] **T-19. JPA Domain Entity 수정 및 필드 추가**
-- [x] **T-20. DTO 및 AI 클라이언트 사용량 수집 구현**
-- [x] **T-24. WebController에 Playground 페이지 엔드포인트 매핑 추가**
-- [x] **T-25. 네비게이션 레이아웃 메뉴 추가 및 common.js 라우팅 추가**
-- [x] **T-29. WebController 보완 및 활성 지자체 모델 연동**
-- [x] **T-33. WebController의 /stats 엔드포인트 지자체 리스트 주입**
-  - [WebController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/WebController.java)의 `stats()` 메소드를 수정하여 `Model`에 활성 지자체 목록 `"govList"`를 바인딩하여 반환하게 수정합니다.
+- [x] **T-36. 통계 화면 탭별 날짜 선택 UI(Date Range Picker) 추가 및 스크립트 연동 개발**
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에 `#startDateInput`과 `#endDateInput`, 물결표(`~`) 구분자를 정의합니다.
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트\2026\vibe coding\workspace\AI_Cast\src\main\resources\static\js\stats.js)에서 `daily` 탭일 땐 종료일 선택 영역을 숨기고, `weekly`/`monthly` 탭일 땐 종료일 선택 영역을 보여주는 동적 토글 스크립트를 구현합니다.
+  - API 호출 파라미터(`date`, `startDate`, `endDate`)가 탭에 맞춰 올바르게 전달되도록 조회 로직을 보완합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
-- [x] **T-16. Java AWT 기반 카드뉴스 이미지 렌더러 개발**
-- [x] **T-17. TestDataGenerator 메인 오케스트레이터 및 연동 검증**
-- [x] **T-21. AOP 로깅 Aspect 수정**
-- [x] **T-22. 일별 통계 집계 배치 서비스 수정**
-- [x] **T-23. 로컬 단위 테스트 및 E2E 통합 테스트 수행**
-- [x] **T-26. playground.html 템플릿 마크업 작성**
-- [x] **T-27. playground.js 비즈니스 로직 구현**
-- [x] **T-30. playground.html 지자체 선택 드롭다운 마크업 보완**
-- [x] **T-31. playground.js 동적 API Key 연동 스크립트 보완**
-- [x] **T-34. stats.html 지자체 렌더링 마크업 보완 및 stats.js 조회 파라미터 동적 연동**
-  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 `#govFilter` 내 하드코딩된 `<option>` 목록을 삭제하고 `th:each` 문법을 사용해 지자체 정보(ID, 명칭)가 출력되도록 동적 템플릿 마크업을 개발합니다.
-  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)에서 지자체 필터 변경 시 자동으로 `loadStats()` 조회를 다시 호출하도록 이벤트를 연동하고, 호출 파라미터 `govId`에 선택된 지자체 ID 값이 바인딩되어 날아가도록 수정합니다.
+- [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
+  - 서버를 컴파일 기동 후 통계 화면으로 이동하여 일별/주별/월별 탭 전환에 따른 날짜 UI 렌더링 변경 상태를 점검합니다.
+  - 실제 조회를 날려 정상적인 API 연동 및 데이터 필터링을 검증합니다.
 
 ### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)
 - [x] **T-35. 최종 E2E 검증 및 로컬 서버 컴파일 반영**

@@ -37,6 +37,13 @@
     align-items: center;
 }
 
+.filter-separator {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0 0.2rem;
+}
+
 .form-control.date-picker,
 .form-control.select-filter {
     margin: 0;

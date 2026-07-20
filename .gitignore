@@ -39,6 +39,7 @@ temp/
 # Local Secrets (Excluded from Git)
 docs/80_RawData/aicast_env_config.txt
 run_e2e_test.ps1
+run_local_server_private.ps1
 
 # Generated Test Data
 docs/80_RawData/testdata/
