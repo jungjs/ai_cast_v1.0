@@ -28,11 +28,15 @@ public class MonitorController {
 
     @GetMapping("/api-status")
     public ResponseEntity<List<Map<String, Object>>> getApiStatus() {
-        // v_api_stat 뷰를 조회하여 최근 API 호출 현황 반환 (최근 1일)
+        // tb_api_log 테이블을 직접 실시간 조회하여 오늘 API 호출 현황 반환
         String sql = """
-            SELECT gov_name, api_key, tot_req, ok_cnt, fail_cnt 
-            FROM v_api_stat 
-            WHERE stat_dt = CURRENT_DATE
+            SELECT gov_name, api_key, 
+                   COUNT(*) AS tot_req, 
+                   SUM(CASE WHEN is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                   SUM(CASE WHEN is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt 
+            FROM tb_api_log 
+            WHERE CAST(req_time AS DATE) = CURRENT_DATE 
+            GROUP BY gov_name, api_key
         """;
         List<Map<String, Object>> statusList = jdbcTemplate.queryForList(sql);
         return ResponseEntity.ok(statusList);

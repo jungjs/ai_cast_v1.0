@@ -98,6 +98,49 @@ public class StatsService {
     }
 
     public List<Map<String, Object>> getDailyStats(String govId, LocalDate date) {
+        boolean isToday = LocalDate.now().equals(date);
+
+        if (isToday) {
+            if ("ALL".equalsIgnoreCase(govId)) {
+                String sql = """
+                    SELECT CAST(? AS DATE) AS stat_dt, l.svc_type, 
+                           COUNT(*) AS tot_cnt, 
+                           SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                           SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
+                           COALESCE(AVG(l.proc_ms), 0) AS avg_ms, 
+                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
+                           COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
+                    FROM tb_ai_svc_log l
+                    WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                return jdbcTemplate.queryForList(sql, date.toString(), date.toString());
+            } else {
+                String sql = """
+                    SELECT CAST(? AS DATE) AS stat_dt, l.svc_type, 
+                           COUNT(*) AS tot_cnt, 
+                           SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                           SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
+                           COALESCE(AVG(l.proc_ms), 0) AS avg_ms, 
+                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
+                           COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
+                    FROM tb_ai_svc_log l
+                    JOIN gov_list g ON l.api_key = g.api_key
+                    WHERE g.id = ? AND CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                try {
+                    Long longGovId = Long.valueOf(govId);
+                    return jdbcTemplate.queryForList(sql, date.toString(), longGovId, date.toString());
+                } catch (NumberFormatException e) {
+                    log.error("Invalid govId format: {}", govId);
+                    return List.of();
+                }
+            }
+        }
+
         if ("ALL".equalsIgnoreCase(govId)) {
             String sql = """
                 SELECT stat_dt, svc_type, 
@@ -126,61 +169,115 @@ public class StatsService {
         }
     }
 
-    public List<Map<String, Object>> getWeeklyStats(String govId, LocalDate weekStart, LocalDate weekEnd) {
-        if ("ALL".equalsIgnoreCase(govId)) {
-            String sql = """
-                SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
-                       SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
-                FROM tb_ai_svc_stat s
-                WHERE s.stat_dt BETWEEN ? AND ?
-                GROUP BY s.svc_type
-            """;
-            return jdbcTemplate.queryForList(sql, weekStart.toString(), weekEnd.toString());
-        }
-
-        String sql = """
-            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
-                   SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
-            FROM tb_ai_svc_stat s
-            JOIN gov_list g ON s.api_key = g.api_key
-            WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?
-            GROUP BY s.svc_type
-        """;
-        try {
-            Long longGovId = Long.valueOf(govId);
-            return jdbcTemplate.queryForList(sql, longGovId, weekStart.toString(), weekEnd.toString());
-        } catch (NumberFormatException e) {
-            log.error("Invalid govId format: {}", govId);
-            return List.of();
-        }
+    public List<Map<String, Object>> getWeeklyStats(String govId, LocalDate startDate, LocalDate endDate) {
+        return getMergedPeriodStats(govId, startDate, endDate);
     }
 
-    public List<Map<String, Object>> getMonthlyStats(String govId, LocalDate monthStart, LocalDate monthEnd) {
-        if ("ALL".equalsIgnoreCase(govId)) {
-            String sql = """
-                SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
-                       SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
-                FROM tb_ai_svc_stat s
-                WHERE s.stat_dt BETWEEN ? AND ?
-                GROUP BY s.svc_type
-            """;
-            return jdbcTemplate.queryForList(sql, monthStart.toString(), monthEnd.toString());
+    public List<Map<String, Object>> getMonthlyStats(String govId, LocalDate startDate, LocalDate endDate) {
+        return getMergedPeriodStats(govId, startDate, endDate);
+    }
+
+    /**
+     * 지정한 기간의 통계를 집계하되, 오늘 날짜가 포함되어 있으면 오늘치 Raw 로그를 실시간 합산하여 반환
+     */
+    private List<Map<String, Object>> getMergedPeriodStats(String govId, LocalDate start, LocalDate end) {
+        LocalDate today = LocalDate.now();
+        boolean includeToday = !today.isBefore(start) && !today.isAfter(end);
+
+        java.util.Map<String, java.util.Map<String, Object>> merged = new java.util.HashMap<>();
+
+        // 1. 오늘 이전까지의 기간에 대해 통계 테이블(tb_ai_svc_stat) 조회
+        LocalDate endForStat = includeToday ? today.minusDays(1) : end;
+        if (!endForStat.isBefore(start)) {
+            List<Map<String, Object>> statData;
+            if ("ALL".equalsIgnoreCase(govId)) {
+                String sql = """
+                    SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                           SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
+                    FROM tb_ai_svc_stat s
+                    WHERE s.stat_dt BETWEEN ? AND ?
+                    GROUP BY s.svc_type
+                """;
+                statData = jdbcTemplate.queryForList(sql, start.toString(), endForStat.toString());
+            } else {
+                String sql = """
+                    SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
+                           SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
+                    FROM tb_ai_svc_stat s
+                    JOIN gov_list g ON s.api_key = g.api_key
+                    WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?
+                    GROUP BY s.svc_type
+                """;
+                try {
+                    Long longGovId = Long.valueOf(govId);
+                    statData = jdbcTemplate.queryForList(sql, longGovId, start.toString(), endForStat.toString());
+                } catch (NumberFormatException e) {
+                    log.error("Invalid govId format: {}", govId);
+                    statData = List.of();
+                }
+            }
+            for (Map<String, Object> row : statData) {
+                String svcType = (String) row.get("svc_type");
+                merged.put(svcType, new java.util.HashMap<>(row));
+            }
         }
 
-        String sql = """
-            SELECT s.svc_type, SUM(s.tot_cnt) as tot_cnt, SUM(s.ok_cnt) as ok_cnt, SUM(s.fail_cnt) as fail_cnt,
-                   SUM(s.tot_tokens) as tot_tokens, SUM(s.prompt_tokens) as prompt_tokens, SUM(s.completion_tokens) as completion_tokens
-            FROM tb_ai_svc_stat s
-            JOIN gov_list g ON s.api_key = g.api_key
-            WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?
-            GROUP BY s.svc_type
-        """;
-        try {
-            Long longGovId = Long.valueOf(govId);
-            return jdbcTemplate.queryForList(sql, longGovId, monthStart.toString(), monthEnd.toString());
-        } catch (NumberFormatException e) {
-            log.error("Invalid govId format: {}", govId);
-            return List.of();
+        // 2. 오늘 날짜가 포함되어 있으면 오늘치 Raw 로그(tb_ai_svc_log) 실시간 집계 및 병합
+        if (includeToday) {
+            List<Map<String, Object>> todayRawData;
+            if ("ALL".equalsIgnoreCase(govId)) {
+                String sql = """
+                    SELECT l.svc_type, 
+                           COUNT(*) AS tot_cnt, 
+                           SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                           SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
+                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
+                           COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
+                    FROM tb_ai_svc_log l
+                    WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                todayRawData = jdbcTemplate.queryForList(sql, today.toString());
+            } else {
+                String sql = """
+                    SELECT l.svc_type, 
+                           COUNT(*) AS tot_cnt, 
+                           SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                           SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
+                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
+                           COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
+                    FROM tb_ai_svc_log l
+                    JOIN gov_list g ON l.api_key = g.api_key
+                    WHERE g.id = ? AND CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                try {
+                    Long longGovId = Long.valueOf(govId);
+                    todayRawData = jdbcTemplate.queryForList(sql, longGovId, today.toString());
+                } catch (NumberFormatException e) {
+                    log.error("Invalid govId format: {}", govId);
+                    todayRawData = List.of();
+                }
+            }
+
+            for (Map<String, Object> row : todayRawData) {
+                String svcType = (String) row.get("svc_type");
+                java.util.Map<String, Object> existing = merged.get(svcType);
+                if (existing == null) {
+                    merged.put(svcType, new java.util.HashMap<>(row));
+                } else {
+                    existing.put("tot_cnt", ((Number) existing.get("tot_cnt")).longValue() + ((Number) row.get("tot_cnt")).longValue());
+                    existing.put("ok_cnt", ((Number) existing.get("ok_cnt")).longValue() + ((Number) row.get("ok_cnt")).longValue());
+                    existing.put("fail_cnt", ((Number) existing.get("fail_cnt")).longValue() + ((Number) row.get("fail_cnt")).longValue());
+                    existing.put("tot_tokens", ((Number) existing.get("tot_tokens")).longValue() + ((Number) row.get("tot_tokens")).longValue());
+                    existing.put("prompt_tokens", ((Number) existing.get("prompt_tokens")).longValue() + ((Number) row.get("prompt_tokens")).longValue());
+                    existing.put("completion_tokens", ((Number) existing.get("completion_tokens")).longValue() + ((Number) row.get("completion_tokens")).longValue());
+                }
+            }
         }
+
+        return new java.util.ArrayList<>(merged.values());
     }
 }
