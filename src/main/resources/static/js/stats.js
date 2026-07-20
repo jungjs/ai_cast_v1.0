@@ -39,12 +39,6 @@ function initDateInput() {
         
         startInput.setAttribute('max', todayStr);
         endInput.setAttribute('max', todayStr);
-        
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setDate(today.getDate() - 30);
-        
-        startInput.valueAsDate = oneMonthAgo;
-        endInput.valueAsDate = today;
     }
 }
 
@@ -63,16 +57,41 @@ function initTabs() {
     toggleDateInputs();
 }
 
+function formatDateLocal(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
 function toggleDateInputs() {
+    const startInput = document.getElementById('startDateInput');
     const endInput = document.getElementById('endDateInput');
     const sep = document.getElementById('dateRangeSeparator');
-    if (endInput && sep) {
+    if (startInput && endInput && sep) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        
         if (activeTab === 'daily') {
             endInput.style.display = 'none';
             sep.style.display = 'none';
-        } else {
+            
+            startInput.value = formatDateLocal(today);
+            endInput.value = formatDateLocal(today);
+        } else if (activeTab === 'weekly') {
             endInput.style.display = 'inline-block';
             sep.style.display = 'inline-block';
+            
+            const thisMonth1st = new Date(yyyy, today.getMonth(), 1);
+            startInput.value = formatDateLocal(thisMonth1st);
+            endInput.value = formatDateLocal(today);
+        } else if (activeTab === 'monthly') {
+            endInput.style.display = 'inline-block';
+            sep.style.display = 'inline-block';
+            
+            const thisYear1st = new Date(yyyy, 0, 1);
+            startInput.value = formatDateLocal(thisYear1st);
+            endInput.value = formatDateLocal(today);
         }
     }
 }
