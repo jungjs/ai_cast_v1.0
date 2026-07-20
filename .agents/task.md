@@ -12,11 +12,18 @@
   - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에 `#startDateInput`과 `#endDateInput`, 물결표(`~`) 구분자를 정의합니다.
   - [stats.js](file:///e:/모빌리티사업본부/프로젝트\2026\vibe coding\workspace\AI_Cast\src\main\resources\static\js\stats.js)에서 `daily` 탭일 땐 종료일 선택 영역을 숨기고, `weekly`/`monthly` 탭일 땐 종료일 선택 영역을 보여주는 동적 토글 스크립트를 구현합니다.
   - API 호출 파라미터(`date`, `startDate`, `endDate`)가 탭에 맞춰 올바르게 전달되도록 조회 로직을 보완합니다.
+- [x] **T-38. 통계 화면 날짜 상한선(max="오늘") 속성 부여 및 자바스크립트 유효성 검증(Validation Guard) 구현**
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) of `initDateInput()` 내부에서 오늘 날짜를 구하고, 각 날짜 입력 요소에 `max` 속성을 지정하는 스크립트를 작성합니다.
+  - `loadStats()` 실행 시 사용자가 임의로 입력한 날짜에 대해 오늘 날짜보다 미래이거나 시작일이 종료일보다 클 경우, 경고 토스트(`showToast`)를 띄우고 조회를 차단하는 가드 코드를 탑재합니다.
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 스크립트 로드 버전을 `v=3` 으로 변경하여 캐시 버스팅을 갱신합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
   - 서버를 컴파일 기동 후 통계 화면으로 이동하여 일별/주별/월별 탭 전환에 따른 날짜 UI 렌더링 변경 상태를 점검합니다.
   - 실제 조회를 날려 정상적인 API 연동 및 데이터 필터링을 검증합니다.
+- [x] **T-39. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 가드 동작 검증**
+  - 변경 내역 컴파일 및 서버 재가동 후 통계화면 달력에서 오늘 이후 날짜 클릭 비활성화 여부를 점검합니다.
+  - 미래 날짜 강제 입력 및 시작일 > 종료일 모순 입력 시 경고 토스트 동작 및 조회 차단 로직이 무결한지 브라우저에서 최종 확인합니다.
 
 ### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)
 - [x] **T-35. 최종 E2E 검증 및 로컬 서버 컴파일 반영**

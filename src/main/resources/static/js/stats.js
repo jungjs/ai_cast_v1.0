@@ -32,6 +32,14 @@ function initDateInput() {
     const endInput = document.getElementById('endDateInput');
     if (startInput && endInput) {
         const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        
+        startInput.setAttribute('max', todayStr);
+        endInput.setAttribute('max', todayStr);
+        
         const oneMonthAgo = new Date();
         oneMonthAgo.setDate(today.getDate() - 30);
         
@@ -120,16 +128,47 @@ function initTable() {
 }
 
 async function loadStats() {
-    const startDateVal = document.getElementById('startDateInput').value;
-    const endDateVal = document.getElementById('endDateInput').value;
+    const startEl = document.getElementById('startDateInput');
+    const endEl = document.getElementById('endDateInput');
+    if (!startEl) return;
+
+    const startDateVal = startEl.value;
+    const endDateVal = endEl ? endEl.value : null;
     if(!startDateVal) return;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const startD = new Date(startDateVal);
+    startD.setHours(0,0,0,0);
+    
+    if (startD > today) {
+        showToast("시작일은 미래 날짜를 선택할 수 없습니다.", "error");
+        startEl.valueAsDate = today;
+        return;
+    }
+    
+    if (activeTab !== 'daily' && endDateVal) {
+        const endD = new Date(endDateVal);
+        endD.setHours(0,0,0,0);
+        
+        if (endD > today) {
+            showToast("종료일은 미래 날짜를 선택할 수 없습니다.", "error");
+            if (endEl) endEl.valueAsDate = today;
+            return;
+        }
+        
+        if (startD > endD) {
+            showToast("시작일이 종료일보다 클 수 없습니다.", "error");
+            return;
+        }
+    }
 
     const govId = document.getElementById('govFilter').value || 'ALL';
     let url = `/api/stats/${activeTab}?govId=${govId}`;
     if(activeTab === 'daily') {
         url += `&date=${startDateVal}`;
     } else {
-        if(!endDateVal) return;
         url += `&startDate=${startDateVal}&endDate=${endDateVal}`;
     }
 
