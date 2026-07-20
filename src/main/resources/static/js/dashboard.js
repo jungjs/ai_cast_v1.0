@@ -17,7 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // 폴링 시작 (API Key 있을 때만)
     if(getApiKey()) {
         loadInitialData();
+        fetchApiStatus();
+        fetchRecentLogs();
+        
         setInterval(fetchLatestResource, 5000); // 5초
+        setInterval(fetchApiStatus, 10000); // 10초
+        setInterval(fetchRecentLogs, 10000); // 10초
     }
 });
 
@@ -191,5 +196,79 @@ function updateAlertBanner(latest) {
         banner.className = `alert-banner glass-card ${levelClass}`;
     } else {
         banner.classList.add('hidden');
+    }
+}
+
+async function fetchApiStatus() {
+    try {
+        const res = await fetchWithAuth('/api/monitor/api-status');
+        const data = await res.json();
+        
+        let totReq = 0, okCnt = 0, failCnt = 0;
+        if(data && data.length > 0) {
+            data.forEach(item => {
+                totReq += item.tot_req || 0;
+                okCnt += item.ok_cnt || 0;
+                failCnt += item.fail_cnt || 0;
+            });
+        }
+        
+        document.getElementById('card-tot-req').textContent = totReq.toLocaleString();
+        document.getElementById('card-ok-cnt').textContent = okCnt.toLocaleString();
+        document.getElementById('card-fail-cnt').textContent = failCnt.toLocaleString();
+        
+        const okRate = totReq > 0 ? ((okCnt / totReq) * 100).toFixed(1) : '0.0';
+        const failRate = totReq > 0 ? ((failCnt / totReq) * 100).toFixed(1) : '0.0';
+        
+        document.getElementById('card-ok-rate').textContent = `${okRate}%`;
+        document.getElementById('card-fail-rate').textContent = `${failRate}%`;
+    } catch(e) {
+        console.error("Failed to fetch API status", e);
+    }
+}
+
+async function fetchRecentLogs() {
+    try {
+        const res = await fetchWithAuth('/api/monitor/recent-logs');
+        const data = await res.json();
+        
+        const body = document.getElementById('recent-logs-body');
+        if(!body) return;
+        
+        body.innerHTML = '';
+        if(data && data.length > 0) {
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                const statusBadge = item.is_ok 
+                    ? '<span class="status-badge success">성공</span>' 
+                    : '<span class="status-badge failure">실패</span>';
+                
+                const reqDate = new Date(item.req_time);
+                const yyyy = reqDate.getFullYear();
+                const mm = String(reqDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(reqDate.getDate()).padStart(2, '0');
+                const hh = String(reqDate.getHours()).padStart(2, '0');
+                const min = String(reqDate.getMinutes()).padStart(2, '0');
+                const ss = String(reqDate.getSeconds()).padStart(2, '0');
+                const timeStr = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+                
+                const govName = item.gov_name || 'UNKNOWN';
+                const timeResult = item.is_ok ? `${item.proc_ms} ms` : '실패';
+                
+                tr.innerHTML = `
+                    <td>${statusBadge}</td>
+                    <td>${timeStr}</td>
+                    <td>${item.endpoint}</td>
+                    <td>${govName}</td>
+                    <td>${timeResult}</td>
+                    <td class="trace-id" onclick="navigator.clipboard.writeText('${item.corr_id}'); showToast('Trace ID 복사 완료!', 'success')">${item.corr_id}</td>
+                `;
+                body.appendChild(tr);
+            });
+        } else {
+            body.innerHTML = '<tr><td colspan="6" style="text-align: center;">데이터 없음</td></tr>';
+        }
+    } catch(e) {
+        console.error("Failed to fetch recent logs", e);
     }
 }

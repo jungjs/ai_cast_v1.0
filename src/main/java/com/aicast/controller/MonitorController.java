@@ -41,4 +41,17 @@ public class MonitorController {
         List<Map<String, Object>> statusList = jdbcTemplate.queryForList(sql);
         return ResponseEntity.ok(statusList);
     }
+
+    @GetMapping("/recent-logs")
+    public ResponseEntity<List<Map<String, Object>>> getRecentLogs() {
+        // tb_api_log 테이블에서 최근 10건의 API 호출 로그를 조회하여 반환
+        String sql = """
+            SELECT is_ok, req_time, endpoint, gov_name, proc_ms, corr_id 
+            FROM tb_api_log 
+            ORDER BY req_time DESC 
+            LIMIT 10
+        """;
+        List<Map<String, Object>> logList = jdbcTemplate.queryForList(sql);
+        return ResponseEntity.ok(logList);
+    }
 }

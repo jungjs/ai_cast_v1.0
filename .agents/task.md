@@ -24,6 +24,11 @@
 - [x] **T-43. stats.js에 서비스 호출 추이 차트(trendChart) 데이터 업데이트 로직 구현**
   - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)의 `updateCharts(data)` 함수 내에 `trendChart` 데이터셋 가공 및 업데이트 코드를 포팅합니다.
   - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 스크립트 로드 버전을 `v=4` 로 변경하여 캐시 버스팅을 갱신합니다.
+- [x] **T-45. MonitorController에 최근 API 호출 로그 10건 반환 엔드포인트(recent-logs) 구현**
+  - [MonitorController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/MonitorController.java)에 `/api/monitor/recent-logs` 엔드포인트를 구현하여 `tb_api_log` 테이블에서 최근 10건의 기록을 역순 정렬 조회 후 반환합니다.
+- [x] **T-46. dashboard.js에 API 통계 카드 및 최근 활동 피드 동적 렌더링 구현**
+  - [dashboard.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/dashboard.js)에 `fetchApiStatus()`와 `fetchRecentLogs()` 메소드를 추가하고 이를 최초 로딩 및 폴링 루프에 적재합니다.
+  - [dashboard.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/dashboard.html)에서 스크립트 임포트 주소 뒤에 캐시 버스팅 파라미터 `(v=2)` 를 매핑합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
@@ -34,8 +39,10 @@
   - 미래 날짜 강제 입력 및 시작일 > 종료일 모순 입력 시 경고 토스트 동작 및 조회 차단 로직이 무결한지 브라우저에서 최종 확인합니다.
 - [x] **T-42. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 실시간 통계 검증**
   - 변경 내역 컴파일 및 서버 재가동 후 대시보드 및 통계화면의 오늘 날짜 지표가 정상적으로 표출되는지 검증합니다.
-- [/] **T-44. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 호출 추이 차트 검증**
+- [x] **T-44. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 호출 추이 차트 검증**
   - 변경 내역 컴파일 반영 후 통계화면의 서비스 호출 추이 차트가 데이터 수치와 함께 선형 그래프로 무결하게 렌더링되는지 확인합니다.
+- [/] **T-47. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 대시보드 복구 기능 검증**
+  - 변경 내역 컴파일 반영 후 대시보드 화면에 접속하여 API 사용 현황 수치가 동적으로 채워지고, 최근 활동 로그가 리스트 형태로 정상 렌더링되는지 최종 점검합니다.
 
 ### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)
 - [x] **T-35. 최종 E2E 검증 및 로컬 서버 컴파일 반영**
