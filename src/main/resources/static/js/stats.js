@@ -134,7 +134,18 @@ function initCharts() {
 }
 
 function initTable() {
-    dataTable = $('#statsTable').DataTable({
+    apiTable = $('#apiStatsTable').DataTable({
+        pageLength: 10,
+        lengthChange: false,
+        searching: true,
+        ordering: true,
+        info: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/ko.json',
+        }
+    });
+
+    aiTable = $('#aiStatsTable').DataTable({
         pageLength: 10,
         lengthChange: false,
         searching: true,
@@ -163,7 +174,7 @@ async function loadStats() {
     
     if (startD > today) {
         showToast("시작일은 미래 날짜를 선택할 수 없습니다.", "error");
-        startEl.valueAsDate = today;
+        startEl.value = formatDateLocal(today);
         return;
     }
     
@@ -173,7 +184,7 @@ async function loadStats() {
         
         if (endD > today) {
             showToast("종료일은 미래 날짜를 선택할 수 없습니다.", "error");
-            if (endEl) endEl.valueAsDate = today;
+            if (endEl) endEl.value = formatDateLocal(today);
             return;
         }
         
@@ -204,33 +215,47 @@ async function loadStats() {
 }
 
 function updateSummaryCards(data) {
-    let tot=0, ok=0, fail=0;
-    data.forEach(d => {
-        tot += d.tot_cnt || 0;
-        ok += d.ok_cnt || 0;
-        fail += d.fail_cnt || 0;
-    });
+    // 1) API 요약 카드 셋팅
+    let apiTot=0, apiOk=0, apiFail=0;
+    if (data.apiStats && data.apiStats.length > 0) {
+        data.apiStats.forEach(d => {
+            apiTot += d.tot_cnt || 0;
+            apiOk += d.ok_cnt || 0;
+            apiFail += d.fail_cnt || 0;
+        });
+    }
+    document.getElementById('api-tot-cnt').textContent = apiTot.toLocaleString();
+    document.getElementById('api-ok-cnt').textContent = apiOk.toLocaleString();
+    document.getElementById('api-fail-cnt').textContent = apiFail.toLocaleString();
+    const apiRate = apiTot > 0 ? ((apiOk / apiTot) * 100).toFixed(1) : 0;
+    document.getElementById('api-ok-rate').textContent = `${apiRate}%`;
 
-    document.getElementById('stat-tot-cnt').textContent = tot.toLocaleString();
-    document.getElementById('stat-ok-cnt').textContent = ok.toLocaleString();
-    document.getElementById('stat-fail-cnt').textContent = fail.toLocaleString();
-    
-    const rateEl = document.getElementById('stat-ok-rate');
-    const rate = tot > 0 ? ((ok / tot) * 100).toFixed(1) : 0;
-    rateEl.textContent = `${rate}%`;
-    
-    rateEl.className = 'card-value';
-    if(rate >= 95) rateEl.classList.add('text-green');
-    else if(rate < 80) rateEl.classList.add('text-red');
+    // 2) AI 서비스 요약 카드 셋팅
+    let aiTot=0, aiOk=0, aiFail=0;
+    if (data.aiStats && data.aiStats.length > 0) {
+        data.aiStats.forEach(d => {
+            aiTot += d.tot_cnt || 0;
+            aiOk += d.ok_cnt || 0;
+            aiFail += d.fail_cnt || 0;
+        });
+    }
+    document.getElementById('ai-tot-cnt').textContent = aiTot.toLocaleString();
+    document.getElementById('ai-ok-cnt').textContent = aiOk.toLocaleString();
+    document.getElementById('ai-fail-cnt').textContent = aiFail.toLocaleString();
+    const aiRate = aiTot > 0 ? ((aiOk / aiTot) * 100).toFixed(1) : 0;
+    document.getElementById('ai-ok-rate').textContent = `${aiRate}%`;
 }
 
 function updateCharts(data) {
+    const trendList = data.trendStats || [];
+    const aiList = data.aiStats || [];
+
     // 1. Service Call Trend (Line Chart)
-    const dates = [...new Set(data.map(d => d.stat_dt || 'N/A'))].sort();
-    const svcTypesForTrend = [...new Set(data.map(d => d.svc_type))];
+    const timeLabels = [...new Set(trendList.map(d => d.time_label || 'N/A'))].sort();
+    const svcTypesForTrend = [...new Set(trendList.map(d => d.svc_type))];
     const trendDatasets = svcTypesForTrend.map(svcType => {
-        const trendData = dates.map(dt => {
-            const matches = data.filter(d => (d.stat_dt || 'N/A') === dt && d.svc_type === svcType);
+        const trendData = timeLabels.map(tl => {
+            const matches = trendList.filter(d => (d.time_label || 'N/A') === tl && d.svc_type === svcType);
             return matches.reduce((sum, curr) => sum + (curr.tot_cnt || 0), 0);
         });
         return {
@@ -243,13 +268,13 @@ function updateCharts(data) {
             fill: false
         };
     });
-    trendChart.data.labels = dates;
+    trendChart.data.labels = timeLabels;
     trendChart.data.datasets = trendDatasets;
     trendChart.update();
 
     // 2. SVC Ratio
     const svcData = {};
-    data.forEach(d => {
+    aiList.forEach(d => {
         svcData[d.svc_type] = (svcData[d.svc_type] || 0) + (d.tot_cnt || 0);
     });
     svcRatioChart.data.labels = Object.keys(svcData);
@@ -259,13 +284,13 @@ function updateCharts(data) {
 
     // 3. Ok/Fail Ratio
     let ok=0, fail=0;
-    data.forEach(d => { ok+=d.ok_cnt||0; fail+=d.fail_cnt||0; });
+    aiList.forEach(d => { ok+=d.ok_cnt||0; fail+=d.fail_cnt||0; });
     okFailRatioChart.data.datasets[0].data = [ok, fail];
     okFailRatioChart.update();
 
     // 4. Avg MS (Bar)
     const avgData = {};
-    data.forEach(d => {
+    aiList.forEach(d => {
         if(d.avg_ms) avgData[d.svc_type] = d.avg_ms;
     });
     avgMsChart.data.labels = Object.keys(avgData);
@@ -275,25 +300,41 @@ function updateCharts(data) {
 }
 
 function updateTable(data) {
-    dataTable.clear();
-    
-    data.forEach(d => {
-        const rate = d.tot_cnt > 0 ? ((d.ok_cnt / d.tot_cnt) * 100).toFixed(1) : 0;
-        const badgeClass = `svc-badge svc-${d.svc_type.toLowerCase()}`;
-        
-        dataTable.row.add([
-            d.stat_dt || 'N/A',
-            `<span class="${badgeClass}">${d.svc_type}</span>`,
-            (d.tot_cnt||0).toLocaleString(),
-            (d.ok_cnt||0).toLocaleString(),
-            (d.fail_cnt||0).toLocaleString(),
-            `${rate}%`,
-            `${d.avg_ms||0}`,
-            formatUsage(d.svc_type, d.tot_tokens)
-        ]);
-    });
-    
-    dataTable.draw();
+    // 1) API 호출 상세 테이블
+    apiTable.clear();
+    if (data.apiStats && data.apiStats.length > 0) {
+        data.apiStats.forEach(d => {
+            const rate = d.tot_cnt > 0 ? ((d.ok_cnt / d.tot_cnt) * 100).toFixed(1) : 0;
+            apiTable.row.add([
+                d.endpoint || 'N/A',
+                (d.tot_cnt||0).toLocaleString(),
+                (d.ok_cnt||0).toLocaleString(),
+                (d.fail_cnt||0).toLocaleString(),
+                `${rate}%`
+            ]);
+        });
+    }
+    apiTable.draw();
+
+    // 2) AI 서비스 상세 테이블
+    aiTable.clear();
+    if (data.aiStats && data.aiStats.length > 0) {
+        data.aiStats.forEach(d => {
+            const rate = d.tot_cnt > 0 ? ((d.ok_cnt / d.tot_cnt) * 100).toFixed(1) : 0;
+            const badgeClass = `svc-badge svc-${d.svc_type.toLowerCase()}`;
+            
+            aiTable.row.add([
+                `<span class="${badgeClass}">${d.svc_type}</span>`,
+                (d.tot_cnt||0).toLocaleString(),
+                (d.ok_cnt||0).toLocaleString(),
+                (d.fail_cnt||0).toLocaleString(),
+                `${rate}%`,
+                `${d.avg_ms||0}`,
+                formatUsage(d.svc_type, d.tot_tokens)
+            ]);
+        });
+    }
+    aiTable.draw();
 }
 
 function formatUsage(svcType, totTokens) {

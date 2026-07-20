@@ -33,6 +33,18 @@
   - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)의 `toggleDateInputs()`를 수정하여 탭 클릭 시 날짜 기본값(일: 오늘, 주: 이번달 1일, 월: 올해 1월 1일)을 동적으로 채우는 기능을 탑재합니다.
   - `initDateInput()` 내부의 고정 기본값(1개월 전) 세팅 구문을 정비합니다.
   - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 스크립트 로드 버전을 `v=6` 로 설정하여 캐시를 무력화합니다.
+- [x] **T-50. StatsResponseDto 생성 및 StatsController 리턴 타입 개조**
+  - [StatsResponseDto.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/dto/StatsResponseDto.java) DTO 클래스를 신설하여 `aiStats`, `apiStats`, `trendStats` 리스트 필드를 포함시킵니다.
+  - [StatsController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/StatsController.java)의 `/daily`, `/weekly`, `/monthly` API 응답 포맷을 DTO 객체 형태로 개조합니다.
+- [x] **T-51. StatsService 내 API/AI 통계 직접 질의 및 시간/일자 추이 차트 쿼리 병합 구현**
+  - [StatsService.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/service/log/StatsService.java)에 `tb_api_log` 기반 엔드포인트별 호출 통계 쿼리 로직을 작성합니다.
+  - 일별 조회 시 `HOUR(req_time)` 함수를 사용해 서비스별 시간대(00시~23시) 추이를 질의하고, 주/월별 시 일자별 추이를 연산해 DTO로 포장해 리턴하는 서비스 레이어를 완성합니다.
+- [x] **T-52. stats.html 요약 카드 구역 이원화 및 2개 상세 테이블 분리 마크업 개편**
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에 API 통계 카드 구역과 AI 서비스 통계 카드 구역을 분리 배치합니다.
+  - 하단 상세 구역에 `#apiStatsTable`과 `#aiStatsTable` 두 개의 데이터 테이블 캔버스를 렌더링하고 버전 쿼리를 `v=7` 로 상향합니다.
+- [x] **T-53. stats.js 2개 DataTables 인스턴스 바인딩 및 가변 추이 차트 렌더링 스크립트 작성**
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)에서 두 개 상세 테이블의 데이터 렌더링(`updateTable()`) 및 DataTables 바인딩을 리팩토링합니다.
+  - `trendChart` 데이터 주입 시, 일별 조회 시에는 `00시`~`23시` 시간대 목록을, 주/월별 조회 시에는 일자 목록을 X축 라벨로 다이나믹 갱신하는 차트 가변 드로잉 로직을 구축합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
@@ -41,6 +53,9 @@
 - [x] **T-44. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 호출 추이 차트 검증**
 - [x] **T-47. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 대시보드 복구 기능 검증**
 - [x] **T-49. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 탭별 날짜 기본값 동작 검증**
+- [x] **T-54. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 통계 대개편 기능 검증**
+  - 통계 페이지를 리로드하여 상단 API 요약, 하단 AI 서비스 요약 수치들이 실시간 누계되는지 확인합니다.
+  - 일별 탭일 땐 X축이 시간대별(시)로, 주/월별 탭일 땐 X축이 일자별로 차트가 렌더링되며 하단의 두 개 데이터 테이블이 올바르게 구획 표출되는지 검증합니다.
   - 통계 페이지 진입 및 탭 전환 시 오늘, 이번달, 이번년도로 날짜 시작일/종료일이 룰에 맞게 갱신되고 쿼리가 연동되는지 검증합니다.
 
 ### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)

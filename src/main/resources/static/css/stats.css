@@ -131,3 +131,32 @@ table.dataTable tbody tr:hover {
 .svc-translate { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
 .svc-ocr { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
 .svc-image_gen { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+
+/* Stats Section Titles */
+.stats-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 1.5rem 0 1rem 0;
+    color: var(--text-primary);
+    border-left: 4px solid var(--primary);
+    padding-left: 0.5rem;
+}
+
+/* Tables Split Layout (Two columns layout for API and AI stats tables) */
+.tables-split-layout {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.table-container.half-width {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 1200px) {
+    .tables-split-layout {
+        flex-direction: column;
+    }
+}

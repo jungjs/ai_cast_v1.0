@@ -32,29 +32,51 @@
         </div>
     </div>
 
-    <!-- C. 요약 카드 (4개) -->
+    <!-- C. API 호출 통계 요약 카드 (4개) -->
+    <h3 class="stats-section-title">API 호출 통계 요약</h3>
     <div class="summary-cards">
         <div class="glass-card stat-card border-blue">
-            <div class="card-title">총 호출수</div>
-            <div class="card-value text-blue" id="stat-tot-cnt">0</div>
+            <div class="card-title">총 API 호출수</div>
+            <div class="card-value text-blue" id="api-tot-cnt">0</div>
         </div>
         <div class="glass-card stat-card border-green">
             <div class="card-title">성공수</div>
-            <div class="card-value text-green" id="stat-ok-cnt">0</div>
+            <div class="card-value text-green" id="api-ok-cnt">0</div>
         </div>
         <div class="glass-card stat-card border-red">
             <div class="card-title">실패수</div>
-            <div class="card-value text-red" id="stat-fail-cnt">0</div>
+            <div class="card-value text-red" id="api-fail-cnt">0</div>
         </div>
         <div class="glass-card stat-card">
             <div class="card-title">성공률</div>
-            <div class="card-value" id="stat-ok-rate">0%</div>
+            <div class="card-value" id="api-ok-rate">0%</div>
+        </div>
+    </div>
+
+    <!-- D. AI 서비스 호출 통계 요약 카드 (4개) -->
+    <h3 class="stats-section-title">AI 서비스 호출 통계 요약</h3>
+    <div class="summary-cards">
+        <div class="glass-card stat-card border-blue">
+            <div class="card-title">총 AI 호출수</div>
+            <div class="card-value text-blue" id="ai-tot-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card border-green">
+            <div class="card-title">성공수</div>
+            <div class="card-value text-green" id="ai-ok-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card border-red">
+            <div class="card-title">실패수</div>
+            <div class="card-value text-red" id="ai-fail-cnt">0</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="card-title">성공률</div>
+            <div class="card-value" id="ai-ok-rate">0%</div>
         </div>
     </div>
 
     <!-- 차트 영역 -->
     <div class="chart-layout">
-        <!-- D. 호출 추이 차트 -->
+        <!-- E. 호출 추이 차트 -->
         <div class="glass-card chart-container full-width">
             <div class="chart-header">
                 <h3>서비스 호출 추이</h3>
@@ -64,7 +86,7 @@
             </div>
         </div>
 
-        <!-- E, F. 비율 및 평균 처리시간 -->
+        <!-- F. 비율 및 평균 처리시간 -->
         <div class="chart-grid-3">
             <div class="glass-card chart-container">
                 <div class="chart-header"><h3>서비스 비율</h3></div>
@@ -81,30 +103,50 @@
         </div>
     </div>
 
-    <!-- G. 상세 통계 테이블 -->
-    <div class="glass-card table-container">
-        <div class="chart-header">
-            <h3>상세 통계</h3>
+    <!-- G. 상세 통계 테이블 이원화 -->
+    <div class="tables-split-layout">
+        <div class="glass-card table-container half-width">
+            <div class="chart-header">
+                <h3>API 호출 상세 통계</h3>
+            </div>
+            <table id="apiStatsTable" class="display dataTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>API 엔드포인트</th>
+                        <th>총 호출</th>
+                        <th>성공</th>
+                        <th>실패</th>
+                        <th>성공률</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
-        <table id="statsTable" class="display dataTable" style="width:100%">
-            <thead>
-                <tr>
-                    <th>날짜</th>
-                    <th>서비스</th>
-                    <th>총 호출</th>
-                    <th>성공</th>
-                    <th>실패</th>
-                    <th>성공률</th>
-                    <th>평균(ms)</th>
-                    <th>사용량</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+        <div class="glass-card table-container half-width">
+            <div class="chart-header">
+                <h3>AI 서비스 상세 통계</h3>
+            </div>
+            <table id="aiStatsTable" class="display dataTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>AI 서비스 종류</th>
+                        <th>총 호출</th>
+                        <th>성공</th>
+                        <th>실패</th>
+                        <th>성공률</th>
+                        <th>평균(ms)</th>
+                        <th>사용량</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Stats JS -->
-    <script th:src="@{/js/stats.js(v=6)}"></script>
+    <script th:src="@{/js/stats.js(v=7)}"></script>
 </div>
 </html>

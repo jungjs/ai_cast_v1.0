@@ -2,6 +2,7 @@ package com.aicast.service.log;
 
 import com.aicast.domain.log.TbAiSvcStat;
 import com.aicast.domain.log.TbAiSvcStatRepository;
+import com.aicast.dto.StatsResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -97,7 +98,43 @@ public class StatsService {
         }
     }
 
-    public List<Map<String, Object>> getDailyStats(String govId, LocalDate date) {
+    public StatsResponseDto getDailyStats(String govId, LocalDate date) {
+        List<Map<String, Object>> aiStats = getDailyAiStats(govId, date);
+        List<Map<String, Object>> apiStats = getApiCallStats(govId, date, date);
+        List<Map<String, Object>> trendStats = getDailyTrendStats(govId, date);
+
+        return StatsResponseDto.builder()
+                .aiStats(aiStats)
+                .apiStats(apiStats)
+                .trendStats(trendStats)
+                .build();
+    }
+
+    public StatsResponseDto getWeeklyStats(String govId, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> aiStats = getMergedPeriodStats(govId, startDate, endDate);
+        List<Map<String, Object>> apiStats = getApiCallStats(govId, startDate, endDate);
+        List<Map<String, Object>> trendStats = getPeriodTrendStats(govId, startDate, endDate);
+
+        return StatsResponseDto.builder()
+                .aiStats(aiStats)
+                .apiStats(apiStats)
+                .trendStats(trendStats)
+                .build();
+    }
+
+    public StatsResponseDto getMonthlyStats(String govId, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> aiStats = getMergedPeriodStats(govId, startDate, endDate);
+        List<Map<String, Object>> apiStats = getApiCallStats(govId, startDate, endDate);
+        List<Map<String, Object>> trendStats = getPeriodTrendStats(govId, startDate, endDate);
+
+        return StatsResponseDto.builder()
+                .aiStats(aiStats)
+                .apiStats(apiStats)
+                .trendStats(trendStats)
+                .build();
+    }
+
+    private List<Map<String, Object>> getDailyAiStats(String govId, LocalDate date) {
         boolean isToday = LocalDate.now().equals(date);
 
         if (isToday) {
@@ -167,14 +204,6 @@ public class StatsService {
             log.error("Invalid govId format: {}", govId);
             return List.of();
         }
-    }
-
-    public List<Map<String, Object>> getWeeklyStats(String govId, LocalDate startDate, LocalDate endDate) {
-        return getMergedPeriodStats(govId, startDate, endDate);
-    }
-
-    public List<Map<String, Object>> getMonthlyStats(String govId, LocalDate startDate, LocalDate endDate) {
-        return getMergedPeriodStats(govId, startDate, endDate);
     }
 
     /**
@@ -279,5 +308,151 @@ public class StatsService {
         }
 
         return new java.util.ArrayList<>(merged.values());
+    }
+
+    private List<Map<String, Object>> getApiCallStats(String govId, LocalDate start, LocalDate end) {
+        if ("ALL".equalsIgnoreCase(govId)) {
+            String sql = """
+                SELECT 
+                    al.endpoint, 
+                    COUNT(*) AS tot_cnt, 
+                    SUM(CASE WHEN al.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                    SUM(CASE WHEN al.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt
+                FROM tb_api_log al
+                WHERE CAST(al.req_time AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)
+                GROUP BY al.endpoint
+            """;
+            return jdbcTemplate.queryForList(sql, start.toString(), end.toString());
+        } else {
+            String sql = """
+                SELECT 
+                    al.endpoint, 
+                    COUNT(*) AS tot_cnt, 
+                    SUM(CASE WHEN al.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
+                    SUM(CASE WHEN al.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt
+                FROM tb_api_log al
+                JOIN gov_list g ON al.api_key = g.api_key
+                WHERE g.id = ? AND CAST(al.req_time AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)
+                GROUP BY al.endpoint
+            """;
+            try {
+                Long longGovId = Long.valueOf(govId);
+                return jdbcTemplate.queryForList(sql, longGovId, start.toString(), end.toString());
+            } catch (NumberFormatException e) {
+                log.error("Invalid govId format: {}", govId);
+                return List.of();
+            }
+        }
+    }
+
+    private List<Map<String, Object>> getDailyTrendStats(String govId, LocalDate date) {
+        if ("ALL".equalsIgnoreCase(govId)) {
+            String sql = """
+                SELECT 
+                    CONCAT(LPAD(HOUR(l.req_time), 2, '0'), '시') AS time_label, 
+                    l.svc_type, 
+                    COUNT(*) AS tot_cnt
+                FROM tb_ai_svc_log l
+                WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                GROUP BY HOUR(l.req_time), l.svc_type
+                ORDER BY HOUR(l.req_time) ASC
+            """;
+            return jdbcTemplate.queryForList(sql, date.toString());
+        } else {
+            String sql = """
+                SELECT 
+                    CONCAT(LPAD(HOUR(l.req_time), 2, '0'), '시') AS time_label, 
+                    l.svc_type, 
+                    COUNT(*) AS tot_cnt
+                FROM tb_ai_svc_log l
+                JOIN gov_list g ON l.api_key = g.api_key
+                WHERE g.id = ? AND CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                GROUP BY HOUR(l.req_time), l.svc_type
+                ORDER BY HOUR(l.req_time) ASC
+            """;
+            try {
+                Long longGovId = Long.valueOf(govId);
+                return jdbcTemplate.queryForList(sql, longGovId, date.toString());
+            } catch (NumberFormatException e) {
+                log.error("Invalid govId format: {}", govId);
+                return List.of();
+            }
+        }
+    }
+
+    private List<Map<String, Object>> getPeriodTrendStats(String govId, LocalDate start, LocalDate end) {
+        LocalDate today = LocalDate.now();
+        boolean includeToday = !today.isBefore(start) && !today.isAfter(end);
+        
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        
+        LocalDate endForStat = includeToday ? today.minusDays(1) : end;
+        if (!endForStat.isBefore(start)) {
+            if ("ALL".equalsIgnoreCase(govId)) {
+                String sql = """
+                    SELECT 
+                        CAST(s.stat_dt AS CHAR) AS time_label, 
+                        s.svc_type, 
+                        SUM(s.tot_cnt) AS tot_cnt
+                    FROM tb_ai_svc_stat s
+                    WHERE s.stat_dt BETWEEN ? AND ?
+                    GROUP BY s.stat_dt, s.svc_type
+                    ORDER BY s.stat_dt ASC
+                """;
+                result.addAll(jdbcTemplate.queryForList(sql, start.toString(), endForStat.toString()));
+            } else {
+                String sql = """
+                    SELECT 
+                        CAST(s.stat_dt AS CHAR) AS time_label, 
+                        s.svc_type, 
+                        SUM(s.tot_cnt) AS tot_cnt
+                    FROM tb_ai_svc_stat s
+                    JOIN gov_list g ON s.api_key = g.api_key
+                    WHERE g.id = ? AND s.stat_dt BETWEEN ? AND ?
+                    GROUP BY s.stat_dt, s.svc_type
+                    ORDER BY s.stat_dt ASC
+                """;
+                try {
+                    Long longGovId = Long.valueOf(govId);
+                    result.addAll(jdbcTemplate.queryForList(sql, longGovId, start.toString(), endForStat.toString()));
+                } catch (NumberFormatException e) {
+                    log.error("Invalid govId format: {}", govId);
+                }
+            }
+        }
+        
+        if (includeToday) {
+            if ("ALL".equalsIgnoreCase(govId)) {
+                String sql = """
+                    SELECT 
+                        CAST(? AS CHAR) AS time_label, 
+                        l.svc_type, 
+                        COUNT(*) AS tot_cnt
+                    FROM tb_ai_svc_log l
+                    WHERE CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                result.addAll(jdbcTemplate.queryForList(sql, today.toString(), today.toString()));
+            } else {
+                String sql = """
+                    SELECT 
+                        CAST(? AS CHAR) AS time_label, 
+                        l.svc_type, 
+                        COUNT(*) AS tot_cnt
+                    FROM tb_ai_svc_log l
+                    JOIN gov_list g ON l.api_key = g.api_key
+                    WHERE g.id = ? AND CAST(l.req_time AS DATE) = CAST(? AS DATE)
+                    GROUP BY l.svc_type
+                """;
+                try {
+                    Long longGovId = Long.valueOf(govId);
+                    result.addAll(jdbcTemplate.queryForList(sql, today.toString(), longGovId, today.toString()));
+                } catch (NumberFormatException e) {
+                    log.error("Invalid govId format: {}", govId);
+                }
+            }
+        }
+        
+        return result;
     }
 }

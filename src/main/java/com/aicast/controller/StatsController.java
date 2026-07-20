@@ -1,5 +1,6 @@
 package com.aicast.controller;
 
+import com.aicast.dto.StatsResponseDto;
 import com.aicast.service.log.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stats")
@@ -18,14 +17,14 @@ public class StatsController {
     private final StatsService statsService;
 
     @GetMapping("/daily")
-    public ResponseEntity<List<Map<String, Object>>> getDailyStats(
+    public ResponseEntity<StatsResponseDto> getDailyStats(
             @RequestParam("govId") String govId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(statsService.getDailyStats(govId, date));
     }
 
     @GetMapping("/weekly")
-    public ResponseEntity<List<Map<String, Object>>> getWeeklyStats(
+    public ResponseEntity<StatsResponseDto> getWeeklyStats(
             @RequestParam("govId") String govId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -33,7 +32,7 @@ public class StatsController {
     }
 
     @GetMapping("/monthly")
-    public ResponseEntity<List<Map<String, Object>>> getMonthlyStats(
+    public ResponseEntity<StatsResponseDto> getMonthlyStats(
             @RequestParam("govId") String govId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
