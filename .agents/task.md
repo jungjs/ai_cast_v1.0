@@ -67,8 +67,12 @@
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 파일 내의 `Upload Artifact` 경로 및 배포 `package` 파라미터를 단일 고정 파일인 `ai_cast-1.0.0-SNAPSHOT.jar` 로 교정합니다.
 - [x] **T-67. GitHub Actions 단일 Job 구조 통합 및 artifact 플러그인 전격 소거**
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 을 리팩토링하여 단일 `build-and-deploy` 작업으로 합치고, `upload/download-artifact` 액션을 제거하여 Node.js 20 Deprecated 충돌을 영구 박멸합니다.
-- [/] **T-68. 사용자 수정 @v5 버전 깃허브 워크플로우 최종 원격 동기화**
+- [x] **T-68. 사용자 수정 @v5 버전 깃허브 워크플로우 최종 원격 동기화**
   - 사용자가 업그레이드 수정한 `azure-deploy.yml` (@v5 버전 격상) 파일을 git commit & push 처리하여 깃허브 액션 배포를 완성합니다.
+- [x] **T-69. 빈 커밋(Empty Commit) Push를 통한 GitHub Actions 수동 재배포 트리거**
+  - `git commit --allow-empty` 명령 및 `git push`를 통해 깃허브 러너 배포를 강제로 재점화합니다.
+- [x] **T-70. GitHub Actions 플러그인 공식 안정 버전(@v4, @v3) 롤백 고정**
+  - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 내의 Actions 버전을 공식 호환 스펙인 `checkout@v4`, `setup-java@v4`, `webapps-deploy@v3` 로 변경하여 400 에러를 제거합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
