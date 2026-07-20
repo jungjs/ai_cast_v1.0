@@ -142,9 +142,39 @@ table.dataTable tbody tr:hover {
     padding-left: 0.5rem;
 }
 
-/* Full Width Table Containers */
-.full-width-table {
+/* Stats Split Layout (Left / Right columns) */
+.stats-split-layout {
+    display: flex;
+    gap: 1.5rem;
     width: 100%;
     margin-bottom: 2rem;
-    padding: 1.5rem;
+}
+
+.stats-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Mini grids for summary cards in 2 columns width */
+.summary-cards.mini-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+    .stats-split-layout {
+        flex-direction: column;
+    }
+    .summary-cards.mini-cards {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-cards.mini-cards {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
 }
