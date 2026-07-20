@@ -57,6 +57,8 @@
   - [stats.css](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/css/stats.css)에 `.stats-split-layout`, `.stats-column`, `.summary-cards.mini-cards` 스타일 코드를 포팅합니다.
 - [x] **T-61. .github/workflows/azure-deploy.yml CI/CD 자동화 파일 신설**
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 신규 경로에 Maven 빌드와 Azure App Service 배포를 일련으로 수행하는 YAML 코드를 작성합니다.
+- [x] **T-63. GitHub Actions 내 Azure App Name 불일치 오류 픽스**
+  - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 파일의 `app-name` 설정을 실물 리소스 명칭인 `aicast-smarti-dev-new` 로 올바르게 교정합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
@@ -68,7 +70,7 @@
 - [x] **T-54. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 통계 대개편 기능 검증**
 - [x] **T-57. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 세로 배치 통계 확인**
 - [x] **T-60. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 수직 2분할 배치 확인**
-- [/] **T-62. 깃 허브 동기화 및 깃허브 액션 신규 워크플로우 YAML 최종 점검**
+- [x] **T-62. 깃 허브 동기화 및 깃허브 액션 신규 워크플로우 YAML 최종 점검**
   - 원격 깃 허브 저장소에 push 한 뒤 YAML 설정 파일이 프로젝트의 디렉토리 구조 상 정상 인출되는지 확인합니다.
   - 통계 페이지를 리로드하여 화면 왼쪽(API 통계 카드+테이블)과 오른쪽(AI 서비스 통계 카드+테이블)이 수직 경계 기준 50%의 데칼코마니 형태 좌우 레이아웃으로 출력되는지 확인합니다.
   - 그 아래 영역에 라인 추이 및 3종 차트가 무결하게 동작하는지 검증합니다.
