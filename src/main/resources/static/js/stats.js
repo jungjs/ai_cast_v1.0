@@ -206,7 +206,29 @@ function updateSummaryCards(data) {
 }
 
 function updateCharts(data) {
-    // 1. SVC Ratio
+    // 1. Service Call Trend (Line Chart)
+    const dates = [...new Set(data.map(d => d.stat_dt || 'N/A'))].sort();
+    const svcTypesForTrend = [...new Set(data.map(d => d.svc_type))];
+    const trendDatasets = svcTypesForTrend.map(svcType => {
+        const trendData = dates.map(dt => {
+            const matches = data.filter(d => (d.stat_dt || 'N/A') === dt && d.svc_type === svcType);
+            return matches.reduce((sum, curr) => sum + (curr.tot_cnt || 0), 0);
+        });
+        return {
+            label: svcType,
+            data: trendData,
+            borderColor: svcColors[svcType] || '#999',
+            backgroundColor: (svcColors[svcType] || '#999') + '33',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false
+        };
+    });
+    trendChart.data.labels = dates;
+    trendChart.data.datasets = trendDatasets;
+    trendChart.update();
+
+    // 2. SVC Ratio
     const svcData = {};
     data.forEach(d => {
         svcData[d.svc_type] = (svcData[d.svc_type] || 0) + (d.tot_cnt || 0);
@@ -216,13 +238,13 @@ function updateCharts(data) {
     svcRatioChart.data.datasets[0].backgroundColor = Object.keys(svcData).map(k => svcColors[k] || '#999');
     svcRatioChart.update();
 
-    // 2. Ok/Fail Ratio
+    // 3. Ok/Fail Ratio
     let ok=0, fail=0;
     data.forEach(d => { ok+=d.ok_cnt||0; fail+=d.fail_cnt||0; });
     okFailRatioChart.data.datasets[0].data = [ok, fail];
     okFailRatioChart.update();
 
-    // 3. Avg MS (Bar)
+    // 4. Avg MS (Bar)
     const avgData = {};
     data.forEach(d => {
         if(d.avg_ms) avgData[d.svc_type] = d.avg_ms;

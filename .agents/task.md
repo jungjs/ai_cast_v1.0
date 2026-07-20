@@ -21,6 +21,9 @@
 - [x] **T-41. StatsService에 오늘 날짜 기준 tb_ai_svc_log 실시간 직접 집계 및 주/월간 병합(Merge) 로직 구현**
   - [StatsService.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/service/log/StatsService.java)의 `getDailyStats()`에 오늘 날짜 조회 분기식을 추가하여 `tb_ai_svc_log`에 대한 직접 Group By 쿼리를 수행합니다.
   - `getWeeklyStats()` 및 `getMonthlyStats()` 내에서 오늘 날짜가 포함된 기간일 시, 통계 테이블(`tb_ai_svc_stat`) 조회 값과 오늘 하루치의 `tb_ai_svc_log` 실시간 집계 값을 취합하여 서비스별로 합산 및 누적 병합(Merge)하여 반환하도록 로직을 작성합니다.
+- [x] **T-43. stats.js에 서비스 호출 추이 차트(trendChart) 데이터 업데이트 로직 구현**
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js)의 `updateCharts(data)` 함수 내에 `trendChart` 데이터셋 가공 및 업데이트 코드를 포팅합니다.
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html)에서 스크립트 로드 버전을 `v=4` 로 변경하여 캐시 버스팅을 갱신합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
@@ -31,6 +34,8 @@
   - 미래 날짜 강제 입력 및 시작일 > 종료일 모순 입력 시 경고 토스트 동작 및 조회 차단 로직이 무결한지 브라우저에서 최종 확인합니다.
 - [x] **T-42. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 실시간 통계 검증**
   - 변경 내역 컴파일 및 서버 재가동 후 대시보드 및 통계화면의 오늘 날짜 지표가 정상적으로 표출되는지 검증합니다.
+- [/] **T-44. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 호출 추이 차트 검증**
+  - 변경 내역 컴파일 반영 후 통계화면의 서비스 호출 추이 차트가 데이터 수치와 함께 선형 그래프로 무결하게 렌더링되는지 확인합니다.
 
 ### 👤 Gale (Gale) - 사용 모델: Gemini 3.5 Flash (Medium)
 - [x] **T-35. 최종 E2E 검증 및 로컬 서버 컴파일 반영**
