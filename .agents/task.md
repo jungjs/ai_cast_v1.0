@@ -73,8 +73,12 @@
   - `git commit --allow-empty` 명령 및 `git push`를 통해 깃허브 러너 배포를 강제로 재점화합니다.
 - [x] **T-70. GitHub Actions 플러그인 공식 안정 버전(@v4, @v3) 롤백 고정**
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 내의 Actions 버전을 공식 호환 스펙인 `checkout@v4`, `setup-java@v4`, `webapps-deploy@v3` 로 변경하여 400 에러를 제거합니다.
-- [/] **T-71. 사용자 수정 v5/v3 복합 명세서 동기화 및 즉시 재배포 트리거**
+- [x] **T-71. 사용자 수정 v5/v3 복합 명세서 동기화 및 즉시 재배포 트리거**
   - 사용자가 최적 조율한 `azure-deploy.yml` (checkout/setup-java@v5, webapps-deploy@v3) 변경 사항을 push하여 재배포를 가동합니다.
+- [x] **T-72. 빈 커밋(Empty Commit) Push를 통한 GitHub Actions 수동 재배포 트리거 (2차)**
+  - `git commit --allow-empty` 명령 및 `git push`를 통해 깃허브 Actions 빌드를 다시 한번 강제 트리거합니다.
+- [x] **T-73. 신규 웹앱 aicast-av-dev 기반 배포 타겟 매핑 및 기동**
+  - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 의 `app-name` 설정을 신규 리소스명인 `aicast-av-dev` 로 변경 후 원격 push하여 배포를 기동합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**

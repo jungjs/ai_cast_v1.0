@@ -27,6 +27,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'aicast-smarti-dev-new'
+          app-name: 'aicast-av-dev'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: 'target/ai_cast-1.0.0-SNAPSHOT.jar'
