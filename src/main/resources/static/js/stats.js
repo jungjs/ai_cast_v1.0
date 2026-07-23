@@ -228,7 +228,9 @@ function updateSummaryCards(data) {
     document.getElementById('api-ok-cnt').textContent = apiOk.toLocaleString();
     document.getElementById('api-fail-cnt').textContent = apiFail.toLocaleString();
     const apiRate = apiTot > 0 ? ((apiOk / apiTot) * 100).toFixed(1) : 0;
+    const apiFailRate = apiTot > 0 ? ((apiFail / apiTot) * 100).toFixed(1) : 0;
     document.getElementById('api-ok-rate').textContent = `${apiRate}%`;
+    document.getElementById('api-fail-rate').textContent = `${apiFailRate}%`;
 
     // 2) AI 서비스 요약 카드 셋팅
     let aiTot=0, aiOk=0, aiFail=0;
@@ -243,7 +245,9 @@ function updateSummaryCards(data) {
     document.getElementById('ai-ok-cnt').textContent = aiOk.toLocaleString();
     document.getElementById('ai-fail-cnt').textContent = aiFail.toLocaleString();
     const aiRate = aiTot > 0 ? ((aiOk / aiTot) * 100).toFixed(1) : 0;
+    const aiFailRate = aiTot > 0 ? ((aiFail / aiTot) * 100).toFixed(1) : 0;
     document.getElementById('ai-ok-rate').textContent = `${aiRate}%`;
+    document.getElementById('ai-fail-rate').textContent = `${aiFailRate}%`;
 }
 
 function updateCharts(data) {

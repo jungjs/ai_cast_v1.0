@@ -98,7 +98,11 @@
 - [x] **T-82. StatsService 내 AI Svc 요약 쿼리 다차원 과금 지표 SUM 연산 튜닝**
   - [StatsService.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/service/log/StatsService.java) 내의 모든 `SUM(total_tokens)` 쿼리를 다차원 컬럼 조건부 합계(STT:req_size, STORAGE:res_size, TRANSLATE:res_size, OCR:1건) 구조로 튜닝합니다.
 - [x] **T-83. stats.js 내 서비스 타입별 과금 단위 매핑 교정**
-  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) 내의 formatUsage 함수를 수정하여 STT는 '초', OCR은 '건'으로 표출되도록 고치고 STORAGE 단위를 정합합니다.
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) 내의 formatUsage 함수를 수정하여 STT는 '초', OCR은 '건'으로 표출되도록 고치하고 STORAGE 단위를 정합합니다.
+- [x] **T-84. stats.html 내 요약 카드 마크업을 대시보드 5개 규격 및 레이블로 동합**
+  - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html) 내의 좌/우 요약 카드를 '전체 요청수, API/AI 성공수, API/AI 실패수, 성공률, 실패율' 규격 of 5개 카드로 리디자인합니다.
+- [x] **T-85. stats.js 내 실패율 계산 및 5개 카드 렌더링 코드 반영**
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) 의 updateSummaryCards 메서드를 고쳐 신설된 실패율 카드를 포함한 5개 수치를 매핑합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
