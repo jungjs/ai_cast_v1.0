@@ -1,0 +1,557 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>AI Cast 시스템 API 상세 설계 매뉴얼</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body {
+    font-family: 'Malgun Gothic', '맑은 고딕', Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: #333333;
+    margin: 20px;
+}
+h1 {
+    font-size: 18pt;
+    color: #003366;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 8px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+h2 {
+    font-size: 14pt;
+    color: #006699;
+    border-bottom: 1px solid #c0c0c0;
+    padding-bottom: 5px;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+h3 {
+    font-size: 11pt;
+    color: #004477;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 15px 0;
+    font-size: 9.5pt;
+}
+th, td {
+    border: 1px solid #cccccc;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+th {
+    background-color: #f2f5f9;
+    color: #003366;
+    font-weight: bold;
+}
+tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+ul, ol {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    padding-left: 20px;
+}
+li {
+    margin-bottom: 5px;
+}
+code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 9.5pt;
+    background-color: #f4f5f7;
+    color: #c7254e;
+    padding: 2px 5px;
+    border: 1px solid #e1e1e8;
+    border-radius: 3px;
+}
+pre {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 9.5pt;
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e6;
+    padding: 12px;
+    margin: 15px 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #333333;
+}
+.badge-required {
+    background-color: #d9534f;
+    color: #ffffff;
+    font-size: 8pt;
+    padding: 2px 6px;
+    font-weight: bold;
+    border-radius: 3px;
+}
+.badge-optional {
+    background-color: #777777;
+    color: #ffffff;
+    font-size: 8pt;
+    padding: 2px 6px;
+    font-weight: bold;
+    border-radius: 3px;
+}
+.alert-note {
+    background-color: #f0f7fd;
+    border-left: 4px solid #337ab7;
+    padding: 12px;
+    margin: 15px 0;
+    font-size: 9.5pt;
+}
+.alert-warning {
+    background-color: #fcf8e3;
+    border-left: 4px solid #f0ad4e;
+    padding: 12px;
+    margin: 15px 0;
+    font-size: 9.5pt;
+}
+</style>
+</head>
+<body>
+
+<h1>AI Cast 시스템 API 상세 설계 매뉴얼 (API Specification)</h1>
+<p>본 문서는 AI Cast 시스템에서 제공하는 모든 REST API의 규격 및 연동을 위한 상세 스펙을 정리한 연동 지침서입니다.</p>
+
+<div class="alert-note">
+    <strong>[최종 업데이트]</strong>: 2026년 7월 23일<br>
+    <strong>[주요 개정 사항]</strong>: WAV 오디오 파일 형식 사전 검증 및 이미지 업로드(20MB 이하/확장자 검증) 예외 방어 사양 도입, 10,000자 초과 대용량 텍스트 번역 시 내부 자동 분할 번역(Auto-Chunking) 메커니즘 반영.
+</div>
+
+<hr>
+
+<h2>1. 공통 사항</h2>
+
+<h3>1.1. 인증 방식 (Authentication)</h3>
+<ul>
+    <li><strong>Header Name</strong>: <code>X-API-KEY</code></li>
+    <li><strong>Description</strong>: 지자체/기관별 발급된 API 연동 키 인증 체계 (Filter 단에서 처리).</li>
+    <li><strong>Validation</strong>: <code>gov_list</code> 테이블에서 API 키 활성화(<code>is_active = 1</code>) 여부를 대조 검사합니다.</li>
+    <li><strong>인증 실패</strong>: 헤더 누락 또는 유효하지 않은 키 사용 시 <code>401 Unauthorized</code> 코드를 반환합니다.</li>
+</ul>
+
+<h3>1.2. 공통 응답 헤더</h3>
+<ul>
+    <li><strong><code>X-Correlation-Id</code></strong>: 트랜잭션 추적 및 모니터링을 위한 고유 UUID 키값입니다. 모든 성공/실패 응답 헤더에 담겨 전달됩니다.</li>
+</ul>
+
+<h3>1.3. 공통 에러 응답 형식</h3>
+
+<h4>① API Key 인증 실패 예외 (401 Unauthorized)</h4>
+<pre>{
+  "corr_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+  "error": true,
+  "status": 401,
+  "message": "Invalid or inactive API key"
+}</pre>
+
+<h4>② 입력값 사전 유효성 검증 실패 예외 (400 Bad Request)</h4>
+<p>파이프라인 진입 전 업로드한 파일 규격이나 제한 조건을 충족하지 못했을 때 반환되는 표준 에러 바디입니다.</p>
+<pre>{
+  "correlationId": "5fa2c3f8-d456-4299-8cf9-a681dcf351eb",
+  "status": "FAILED",
+  "errorMessage": "[검증 오류] WAV 포맷 오디오 파일만 업로드할 수 있습니다.",
+  "originalText": null,
+  "refinedText": null,
+  "summary": null,
+  "translations": null,
+  "imageUrl": null,
+  "processingTimesMs": null
+}</pre>
+
+---
+
+<h2>2. 서비스 파이프라인 API</h2>
+
+<h3>2.1. 시스템 상태 확인 (API-01)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/ping</code></li>
+    <li><strong>인증</strong>: 불필요</li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "ok": true,
+  "msg": "pong"
+}</pre>
+    </li>
+</ul>
+
+<h3>2.2. 최신 결과 조회 (API-02)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/latest</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "exists": true,
+  "item": {
+    "id": "uuid-hex-string",
+    "corr_id": "corr-uuid-string",
+    "stt": "인식된 원문 텍스트입니다.",
+    "refined": "정제된 표준어 텍스트입니다.",
+    "summary": "정제 텍스트를 200자 이내로 요약한 방송문구입니다.",
+    "translations": {
+      "en": { "text": "English text...", "img_url": "https://blob.core.windows.net/container/en.png" },
+      "ja": { "text": "日本語テキスト...", "img_url": "https://blob.core.windows.net/container/ja.png" }
+    },
+    "proc_ms": 4570
+  }
+}</pre>
+    </li>
+</ul>
+
+<h3>2.3. 음성 처리 파이프라인 (API-03)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>POST /api/process_audio</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>Content-Type</strong>: <code>multipart/form-data</code></li>
+    <li><strong>파라미터 정의</strong>:
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">파라미터명</th>
+                    <th style="width: 20%;">타입</th>
+                    <th style="width: 15%;">필수 여부</th>
+                    <th style="width: 40%;">설명</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>file</code></td>
+                    <td>File (Binary)</td>
+                    <td><span class="badge-required">Required</span></td>
+                    <td>STT 처리용 오디오 파일</td>
+                </tr>
+                <tr>
+                    <td><code>langs</code></td>
+                    <td>String (CSV)</td>
+                    <td><span class="badge-optional">Optional</span></td>
+                    <td>번역 대상 언어 코드 리스트 (기본값: <code>en,ja,zh-Hans</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li><strong>제약 조건 (Constraints)</strong>:
+        <div class="alert-warning">
+            • <strong>오디오 포맷 제한</strong>: Content-Type이 <code>audio/wav</code>, <code>audio/x-wav</code>, <code>audio/wave</code>이거나 원본 파일 확장자가 <code>.wav</code>인 오디오 파일만 업로드 가능합니다. (WAV가 아닐 시 HTTP 400 에러 및 <code>[검증 오류] WAV 포맷 오디오 파일만...</code> 리턴)<br>
+            • <strong>시간 제한 제약 우회</strong>: 본 API는 SDK의 연속 음성 인식(Continuous Speech Recognition)을 기반으로 작동하므로, REST API에서 발생하는 60초 재생 제한을 극복하고 대용량 오디오 파일도 한계 없이 안전하게 인식합니다.
+        </div>
+    </li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "id": "7cc8418a-9692-4d50-84f9-b3076708bbf7",
+  "corr_id": "a98b7c6d-5e4d-3c2b-1a0f-9e8d7c6b5a4f",
+  "stt": "어제 저녁부터 비가 많이 내렸응게...",
+  "refined": "어제 저녁부터 비가 많이 내렸으니까...",
+  "summary": "어제 저녁부터 내린 많은 비로 인해 배수로 관리 및 외출 자제를 부탁드립니다.",
+  "translations": {
+    "en": { "text": "Due to the heavy rain since last night...", "img_url": "https://storage.blob.core.windows.net/casts/en_7cc.png" },
+    "ja": { "text": "昨夜からの大雨のため...", "img_url": "https://storage.blob.core.windows.net/casts/ja_7cc.png" }
+  },
+  "category": "disaster",
+  "proc_ms": 4820
+}</pre>
+    </li>
+</ul>
+
+<h3>2.4. 텍스트 처리 파이프라인 (API-04)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>POST /api/process_text</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>Content-Type</strong>: <code>application/x-www-form-urlencoded</code> 또는 <code>multipart/form-data</code></li>
+    <li><strong>파라미터 정의</strong>:
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">파라미터명</th>
+                    <th style="width: 20%;">타입</th>
+                    <th style="width: 15%;">필수 여부</th>
+                    <th style="width: 40%;">설명</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>text</code></td>
+                    <td>String</td>
+                    <td><span class="badge-required">Required</span></td>
+                    <td>처리 대상 원본 사투리 텍스트</td>
+                </tr>
+                <tr>
+                    <td><code>langs</code></td>
+                    <td>String (CSV)</td>
+                    <td><span class="badge-optional">Optional</span></td>
+                    <td>번역 대상 언어 코드 리스트 (기본값: <code>en,ja,zh-Hans</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li><strong>제약 조건 (Constraints)</strong>:
+        <div class="alert-warning">
+            • <strong>Azure Translator 10,000자 제한 극복</strong>: 번역 대상 문자열의 총길이가 Azure AI Translator의 제한인 10,000자를 초과하는 경우, 시스템이 자동으로 **9,000자 단위의 문맥 보존 분할 번역(Context-aware Splitting)**을 실행합니다. 문장 기호(<code>\n</code>, <code>.</code>, <code>?</code>, <code>!</code>, 공백)를 기준으로 잘라 조각별 번역을 실행 후 결합하므로, 호출 한계로 인한 오류가 전혀 발생하지 않습니다.
+        </div>
+    </li>
+    <li><strong>응답 샘플 (200 OK)</strong>: API-03과 동일 구조입니다. (단, <code>stt</code> 필드는 직접 수신하였으므로 <code>null</code>로 처리됨)</li>
+</ul>
+
+<h3>2.5. 이미지 처리 파이프라인 (API-05)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>POST /api/process_img</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>Content-Type</strong>: <code>multipart/form-data</code></li>
+    <li><strong>파라미터 정의</strong>:
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">파라미터명</th>
+                    <th style="width: 20%;">타입</th>
+                    <th style="width: 15%;">필수 여부</th>
+                    <th style="width: 40%;">설명</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>file</code></td>
+                    <td>File (Binary)</td>
+                    <td><span class="badge-required">Required</span></td>
+                    <td>OCR 분석용 문서 이미지 파일</td>
+                </tr>
+                <tr>
+                    <td><code>langs</code></td>
+                    <td>String (CSV)</td>
+                    <td><span class="badge-optional">Optional</span></td>
+                    <td>번역 대상 언어 코드 리스트 (기본값: <code>en,ja,zh-Hans</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li><strong>제약 조건 (Constraints)</strong>:
+        <div class="alert-warning">
+            • <strong>이미지 용량 제한</strong>: 이미지 파일 크기는 최대 **20MB 이하**여야 합니다. (20MB 초과 업로드 시 <code>[검증 오류] 이미지 파일 용량은 최대 20MB를...</code> 에러 400 반환)<br>
+            • <strong>이미지 포맷 제한</strong>: 허용되는 이미지 파일의 확장자는 <code>.jpg</code>, <code>.jpeg</code>, <code>.png</code>, <code>.gif</code>, <code>.bmp</code>, <code>.webp</code>, <code>.pdf</code>, <code>.tiff</code> 로 한정됩니다. (이외 형식 업로드 시 <code>[검증 오류] 지원되지 않는 이미지 파일...</code> 에러 400 반환)
+        </div>
+    </li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "id": "8bb9423c-a982-1234-bcde-5fa6b7c8d9e0",
+  "corr_id": "c1d2e3f4-5678-abcd-ef01-23456789abcd",
+  "ocr": "공지사항 주민동향 안내문...",
+  "refined": "공지사항 주민동향 안내문...",
+  "summary": "주민동향 안내문 공지사항 요약입니다.",
+  "translations": {
+    "en": { "text": "Notice of residents safety guide...", "img_url": "https://storage.blob.core.windows.net/casts/en_8bb.png" }
+  },
+  "category": "notice",
+  "proc_ms": 3200
+}</pre>
+    </li>
+</ul>
+
+---
+
+<h2>3. AI 호출 통계 API</h2>
+
+<h3>3.1. 일별 호출 통계 조회 (API-06)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/stats/daily</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>쿼리 파라미터</strong>:
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">파라미터명</th>
+                    <th style="width: 20%;">타입</th>
+                    <th style="width: 15%;">필수 여부</th>
+                    <th style="width: 40%;">설명</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>start_date</code></td>
+                    <td>String (YYYY-MM-DD)</td>
+                    <td><span class="badge-required">Required</span></td>
+                    <td>조회 시작 일자</td>
+                </tr>
+                <tr>
+                    <td><code>end_date</code></td>
+                    <td>String (YYYY-MM-DD)</td>
+                    <td><span class="badge-required">Required</span></td>
+                    <td>조회 종료 일자</td>
+                </tr>
+                <tr>
+                    <td><code>svc_type</code></td>
+                    <td>String</td>
+                    <td><span class="badge-optional">Optional</span></td>
+                    <td>서비스 필터 (<code>STT</code>, <code>NLP</code>, <code>TRANSLATE</code>, <code>OCR</code>, <code>STORAGE</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "period": { "start": "2026-07-01", "end": "2026-07-20" },
+  "stats": [
+    {
+      "stat_dt": "2026-07-20",
+      "gov_name": "서울특별시청",
+      "svc_type": "STT",
+      "tot_cnt": 15,
+      "ok_cnt": 15,
+      "fail_cnt": 0,
+      "avg_ms": 4200,
+      "tot_tokens": 1280
+    }
+  ]
+}</pre>
+    </li>
+</ul>
+
+<h3>3.2. 주별 호출 통계 조회 (API-07)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/stats/weekly</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>쿼리 파라미터</strong>: <code>year</code> (연도, 필수), <code>week</code> (주차, 필수), <code>svc_type</code> (선택)</li>
+    <li><strong>응답 구조</strong>: API-06과 완전히 대등합니다.</li>
+</ul>
+
+<h3>3.3. 월별 호출 통계 조회 (API-08)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/stats/monthly</code></li>
+    <li><strong>인증</strong>: 필요</li>
+    <li><strong>쿼리 파라미터</strong>: <code>year</code> (연도, 필수), <code>month</code> (월, 필수), <code>svc_type</code> (선택)</li>
+    <li><strong>응답 구조</strong>: API-06과 완전히 대등합니다.</li>
+</ul>
+
+---
+
+<h2>4. 시스템 모니터링 API</h2>
+
+<h3>4.1. 서버 리소스 모니터링 조회 (API-09)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/monitor/resources</code></li>
+    <li><strong>인증</strong>: 필요 (관리자 전용)</li>
+    <li><strong>설명</strong>: 5초 주기로 영속되는 서버 인프라 리소스 로그 중 최신 1시간 이내의 RAW 모니터링 정보를 조회합니다.</li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "ctnr_id": "DESKTOP-NSUKE7L",
+  "data": [
+    {
+      "col_dt": "2026-07-23T22:00:00",
+      "cpu_pct": 14.5,
+      "mem_mb": 14250,
+      "mem_lmt_mb": 16384,
+      "net_rx": 0,
+      "net_tx": 0,
+      "disk_rd": 0,
+      "disk_wr": 0
+    }
+  ],
+  "alerts": []
+}</pre>
+    </li>
+</ul>
+
+<h3>4.2. API 실시간 사용 현황 조회 (API-10)</h3>
+<ul>
+    <li><strong>Endpoint</strong>: <code>GET /api/monitor/api-status</code></li>
+    <li><strong>인증</strong>: 필요 (관리자 전용)</li>
+    <li><strong>응답 샘플 (200 OK)</strong>:
+        <pre>{
+  "period": "today",
+  "summary": {
+    "tot_req": 80,
+    "ok_cnt": 78,
+    "fail_cnt": 2,
+    "ok_rate": 97.5,
+    "fail_rate": 2.5
+  },
+  "by_endpoint": [
+    {
+      "req_path": "/api/process_audio",
+      "tot_req": 30,
+      "ok_cnt": 30,
+      "fail_cnt": 0,
+      "avg_ms": 4820
+    }
+  ]
+}</pre>
+    </li>
+</ul>
+
+---
+
+<h2>5. HTTP 상태 코드 체계 (Status Codes)</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 15%;">상태 코드</th>
+            <th style="width: 30%;">명칭</th>
+            <th style="width: 55%;">의미 및 발생 케이스</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>200</code></td>
+            <td>OK</td>
+            <td>API 요청이 완전히 성공함.</td>
+        </tr>
+        <tr>
+            <td><code>400</code></td>
+            <td>Bad Request</td>
+            <td>입력 파일 형식 위배(비WAV 오디오), 이미지 용량 초과(20MB), 지원 포맷 위배 시 사전 감지 예외.</td>
+        </tr>
+        <tr>
+            <td><code>401</code></td>
+            <td>Unauthorized</td>
+            <td><code>X-API-KEY</code> 헤더가 누락되었거나 비활성/오류 키 입력 시.</td>
+        </tr>
+        <tr>
+            <td><code>403</code></td>
+            <td>Forbidden</td>
+            <td>관리자 권한이 필요한 모니터링 API에 일반 키로 접근 시.</td>
+        </tr>
+        <tr>
+            <td><code>404</code></td>
+            <td>Not Found</td>
+            <td>존재하지 않는 REST API 엔드포인트 호출 시.</td>
+        </tr>
+        <tr>
+            <td><code>413</code></td>
+            <td>Payload Too Large</td>
+            <td>웹 컨테이너 최대 업로드 바이트 전송 제한 초과 시. (400 예외와 병행 감지)</td>
+        </tr>
+        <tr>
+            <td><code>429</code></td>
+            <td>Too Many Requests</td>
+            <td>Azure AI 서비스의 구독별 제한(TPM/RPM) 쓰로틀링 임계치를 돌파한 경우.</td>
+        </tr>
+        <tr>
+            <td><code>500</code></td>
+            <td>Internal Server Error</td>
+            <td>서버 내부 비즈니스 로직 연산 중 크래시 발생 시.</td>
+        </tr>
+        <tr>
+            <td><code>503</code></td>
+            <td>Service Unavailable</td>
+            <td>Azure Speech, OpenAI, Translator 서비스 장애로 작동 불가한 상태.</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
