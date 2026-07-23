@@ -79,6 +79,8 @@
   - `git commit --allow-empty` 명령 및 `git push`를 통해 깃허브 Actions 빌드를 다시 한번 강제 트리거합니다.
 - [x] **T-73. 신규 웹앱 aicast-av-dev 기반 배포 타겟 매핑 및 기동**
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 의 `app-name` 설정을 신규 리소스명인 `aicast-av-dev` 로 변경 후 원격 push하여 배포를 기동합니다.
+- [x] **T-74. Azure Speech SDK 버전 격상을 통한 OpenSSL 3.0 리눅스 호환 패치**
+  - [pom.xml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/pom.xml) 의 `com.microsoft.cognitiveservices.speech` 버전을 `1.34.0` 에서 `1.38.0` 으로 올려 원격 push하여 배포를 기동합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
