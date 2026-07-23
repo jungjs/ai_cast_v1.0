@@ -103,6 +103,12 @@
   - [stats.html](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/templates/stats.html) 내의 좌/우 요약 카드를 '전체 요청수, API/AI 성공수, API/AI 실패수, 성공률, 실패율' 규격 of 5개 카드로 리디자인합니다.
 - [x] **T-85. stats.js 내 실패율 계산 및 5개 카드 렌더링 코드 반영**
   - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) 의 updateSummaryCards 메서드를 고쳐 신설된 실패율 카드를 포함한 5개 수치를 매핑합니다.
+- [x] **T-86. PipelineController 파일 입력(STT/OCR) 사전 유효성 필터 및 HTTP 400 DTO 예외 반환 구현**
+  - [PipelineController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/PipelineController.java) 내에 WAV 오디오 포맷 및 20MB 이하 이미지 검증기를 적용하고 HTTP 400 에러 본문 명세를 리턴합니다.
+- [x] **T-87. AzureTranslatorClient 대용량 번역(10,000자 초과) 시 문맥 보존 자동 분할(Chunking) 및 루프 연계 구현**
+  - [AzureTranslatorClient.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/client/translate/AzureTranslatorClient.java) 내에 9,000자 기준 문맥 보존 분할 번역 알고리즘을 이식합니다.
+- [x] **T-88. 로컬 전체 단위 테스트 및 신규 기능 동작 통합 검증**
+  - 로컬 환경 컴파일 후 JUnit 전체 단위 테스트를 돌려 기능 무결성을 입증합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**

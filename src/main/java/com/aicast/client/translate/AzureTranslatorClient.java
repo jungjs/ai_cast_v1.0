@@ -107,6 +107,30 @@ public class AzureTranslatorClient implements TranslateClient {
     }
 
     private String callTranslatorApi(String text, String from, String to) throws Exception {
+        if (text == null) {
+            return "";
+        }
+
+        int limit = 9000;
+        if (text.length() <= limit) {
+            return callTranslatorApiRaw(text, from, to);
+        }
+
+        log.info("번역 텍스트가 {}자를 초과하여 스마트 분할 번역을 수행합니다. (총 길이: {})", limit, text.length());
+        List<String> chunks = splitIntoChunks(text, limit);
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < chunks.size(); i++) {
+            String chunk = chunks.get(i);
+            log.info("분할 번역 수행 중: {} / {}", i + 1, chunks.size());
+            String translatedChunk = callTranslatorApiRaw(chunk, from, to);
+            sb.append(translatedChunk);
+        }
+
+        return sb.toString();
+    }
+
+    private String callTranslatorApiRaw(String text, String from, String to) throws Exception {
         String uri = String.format("/translate?api-version=3.0&from=%s&to=%s", from, to);
         List<Map<String, String>> body = List.of(Map.of("Text", text));
 
@@ -121,6 +145,57 @@ public class AzureTranslatorClient implements TranslateClient {
                 .block();
 
         return parseTranslationResponse(response);
+    }
+
+    private List<String> splitIntoChunks(String text, int maxChunkSize) {
+        List<String> chunks = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return chunks;
+        }
+
+        int length = text.length();
+        int start = 0;
+
+        while (start < length) {
+            int end = start + maxChunkSize;
+            if (end >= length) {
+                chunks.add(text.substring(start));
+                break;
+            }
+
+            // 문장 종결 기호(줄바꿈, 마침표, 물음표, 느낌표)를 뒤에서부터 역탐색하여 잘라냄
+            int limit = start + (int)(maxChunkSize * 0.7); // 최소 70% 구역까지 탐색
+            int cutIndex = -1;
+
+            for (int i = end; i >= limit; i--) {
+                char c = text.charAt(i);
+                if (c == '\n' || c == '.' || c == '?' || c == '!') {
+                    cutIndex = i + 1; // 종결자 바로 뒤에서 끊음
+                    break;
+                }
+            }
+
+            if (cutIndex == -1) {
+                // 마땅한 종결자가 없으면 공백(' ')을 기준으로 탐색
+                for (int i = end; i >= limit; i--) {
+                    char c = text.charAt(i);
+                    if (c == ' ') {
+                        cutIndex = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            if (cutIndex == -1) {
+                // 이마저도 없으면 어쩔 수 없이 절대 크기로 분할
+                cutIndex = end;
+            }
+
+            chunks.add(text.substring(start, cutIndex));
+            start = cutIndex;
+        }
+
+        return chunks;
     }
 
     private String parseTranslationResponse(String jsonResponse) throws Exception {

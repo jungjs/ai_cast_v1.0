@@ -132,4 +132,46 @@ class AzureTranslatorClientTest {
         verify(webClient, times(2)).post();
         verify(cacheService, times(1)).put(sourceText, "vi", "Xin chào (API)");
     }
+
+    @Test
+    @DisplayName("9,000자 초과 대용량 텍스트 번역 시 청크 분할 및 연속 번역 수행 검증")
+    void translate_LargeTextChunking() {
+        // Given
+        // 9,500글자의 긴 문장 생성 (9,000자에서 잘라지도록 4,800자 + \n + 4,700자 형태로 배치)
+        String firstSentence = "A".repeat(4800) + "\n";
+        String secondSentence = "B".repeat(4700);
+        String largeSourceText = firstSentence + secondSentence;
+        
+        List<String> targetLangs = Collections.singletonList("en");
+        
+        // 각각의 청크에 대한 Mock API 응답 준비
+        String jsonResponse1 = "[{\"translations\":[{\"text\":\"TranslatedChunk1\", \"to\":\"en\"}]}]";
+        String jsonResponse2 = "[{\"translations\":[{\"text\":\"TranslatedChunk2\", \"to\":\"en\"}]}]";
+        
+        when(cacheService.get(largeSourceText, "en")).thenReturn(null);
+        
+        // WebClient 체이닝 모킹
+        when(webClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
+        when(requestBodySpec.header(anyString(), any())).thenReturn(requestBodySpec);
+        when(requestBodySpec.contentType(any())).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        
+        // 순차적으로 2번 호출될 때 각각의 응답 지정
+        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just(jsonResponse1), Mono.just(jsonResponse2));
+        
+        // When
+        TranslationResult result = translatorClient.translate(largeSourceText, "ko", targetLangs);
+        
+        // Then
+        assertNotNull(result);
+        assertEquals("SUCCESS", result.getStatus());
+        // 병합된 결과가 리턴되었는지 확인
+        assertEquals("TranslatedChunk1TranslatedChunk2", result.getTranslations().get("en"));
+        
+        // 2번의 API 호출이 일어났는지 확인
+        verify(webClient, times(2)).post();
+        verify(cacheService, times(1)).put(largeSourceText, "en", "TranslatedChunk1TranslatedChunk2");
+    }
 }
