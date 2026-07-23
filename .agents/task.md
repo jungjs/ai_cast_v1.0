@@ -87,6 +87,14 @@
   - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 번역 시 토큰은 null로 적재하고, 글자 수를 크기 지표로 매핑하여 push합니다.
 - [x] **T-77. STT / OCR 연산 시 추출 텍스트 글자 수를 totalTokens 에 반영 수집 패치**
   - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 STT(String), OCR(OcrResult) 호출 완료 시 획득된 텍스트의 글자 수를 totalTokens 필드에 바인딩하여 push합니다.
+- [x] **T-78. STT 오디오 파일 파싱 및 재생 시간(초) 계산 로직 구현**
+  - [DefaultPipelineService.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/service/pipeline/DefaultPipelineService.java) 에서 오디오 수신 시 헤더를 분석하여 재생 초(sec)를 계산하고 가공 전달하도록 수정합니다.
+- [x] **T-79. AOP 로그 수집기 내 STT/STORAGE 비용 지표 매핑 패치**
+  - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 STT 재생 초를 req_size로, STORAGE 파일 용량을 res_size로 수집하도록 조율합니다.
+- [x] **T-80. 로컬 Maven 빌드 및 컴파일 유닛 테스트 검증**
+  - 로컬 환경변수 기반 컴파일 및 테스트를 돌려 오류가 없는지 최종 빌드 검증을 진행합니다.
+- [/] **T-81. 로컬 Git 커밋 보존 (원격 Push 배포 보류)**
+  - 로컬 Git 변경분을 커밋하되, 원격 push는 진행하지 않고 대기합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**

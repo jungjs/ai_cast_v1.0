@@ -38,6 +38,10 @@ public class DefaultPipelineService implements PipelineService {
         PipelineResponse.PipelineResponseBuilder builder = initResponse();
         Map<String, Long> times = new HashMap<>();
 
+        // 과금 계측용 오디오 실제 재생 시간(초) 획득 및 MDC 바인딩
+        int duration = getAudioDuration(audioFile);
+        MDC.put("audioDuration", String.valueOf(duration));
+
         try {
             // 1. STT
             long start = System.currentTimeMillis();
@@ -61,10 +65,31 @@ public class DefaultPipelineService implements PipelineService {
         } catch (Exception e) {
             log.error("Audio Pipeline Error", e);
             builder.status("FAILED").errorMessage(e.getMessage());
+        } finally {
+            MDC.remove("audioDuration");
         }
 
         builder.processingTimesMs(times);
         return builder.build();
+    }
+
+    /**
+     * 오디오 파일(MultipartFile)의 재생 길이(초)를 구합니다.
+     */
+    private int getAudioDuration(MultipartFile file) {
+        try (java.io.InputStream is = new java.io.BufferedInputStream(file.getInputStream())) {
+            try (javax.sound.sampled.AudioInputStream audioStream = javax.sound.sampled.AudioSystem.getAudioInputStream(is)) {
+                javax.sound.sampled.AudioFormat format = audioStream.getFormat();
+                long frames = audioStream.getFrameLength();
+                double durationInSeconds = (double) frames / format.getFrameRate();
+                return (int) Math.ceil(durationInSeconds);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse native WAV audio duration. Fallback to PCM-32K size estimation.", e);
+            // 16kHz, 16bit, Mono PCM(WAV) 사양의 초당 용량은 약 32,000 Byte입니다.
+            long size = file.getSize();
+            return (int) Math.max(1, Math.ceil((double) size / 32000));
+        }
     }
 
     @Override

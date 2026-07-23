@@ -70,10 +70,22 @@ public class AiSvcLogAspect {
             } else if ("STT".equals(svcType) && result instanceof String) {
                 String txt = (String) result;
                 totalTokens = txt.length();
+                String durationStr = MDC.get("audioDuration");
+                if (durationStr != null) {
+                    try {
+                        reqSize = Integer.parseInt(durationStr);
+                    } catch (NumberFormatException ignored) {}
+                }
             } else if (result instanceof OcrResult) {
                 OcrResult ocr = (OcrResult) result;
                 if (ocr.getExtractedText() != null) {
                     totalTokens = ocr.getExtractedText().length();
+                }
+            } else if ("STORAGE".equals(svcType)) {
+                Object[] args = joinPoint.getArgs();
+                if (args != null && args.length > 0 && args[0] instanceof byte[]) {
+                    reqSize = ((byte[]) args[0]).length; // 업로드된 실물 파일의 크기(Byte)
+                    resSize = reqSize; // 과금 통계용 용량을 resSize에도 할당
                 }
             }
 
@@ -105,7 +117,7 @@ public class AiSvcLogAspect {
     private String deriveSvcType(ProceedingJoinPoint joinPoint) {
         // 1. 선언부 인터페이스 타입 기준 판별 (프록시의 영향을 전혀 받지 않음)
         Class<?> declaringType = joinPoint.getSignature().getDeclaringType();
-        String typeName = declaringType.getSimpleName();
+        String typeName = declaringType != null ? declaringType.getSimpleName() : "";
 
         if (typeName.contains("Speech") || typeName.contains("Stt")) return "STT";
         if (typeName.contains("OpenAI") || typeName.contains("Nlp")) return "NLP";

@@ -297,12 +297,12 @@ public class StatsService {
                 if (existing == null) {
                     merged.put(svcType, new java.util.HashMap<>(row));
                 } else {
-                    existing.put("tot_cnt", ((Number) existing.get("tot_cnt")).longValue() + ((Number) row.get("tot_cnt")).longValue());
-                    existing.put("ok_cnt", ((Number) existing.get("ok_cnt")).longValue() + ((Number) row.get("ok_cnt")).longValue());
-                    existing.put("fail_cnt", ((Number) existing.get("fail_cnt")).longValue() + ((Number) row.get("fail_cnt")).longValue());
-                    existing.put("tot_tokens", ((Number) existing.get("tot_tokens")).longValue() + ((Number) row.get("tot_tokens")).longValue());
-                    existing.put("prompt_tokens", ((Number) existing.get("prompt_tokens")).longValue() + ((Number) row.get("prompt_tokens")).longValue());
-                    existing.put("completion_tokens", ((Number) existing.get("completion_tokens")).longValue() + ((Number) row.get("completion_tokens")).longValue());
+                    existing.put("tot_cnt", getLongValue(existing, "tot_cnt") + getLongValue(row, "tot_cnt"));
+                    existing.put("ok_cnt", getLongValue(existing, "ok_cnt") + getLongValue(row, "ok_cnt"));
+                    existing.put("fail_cnt", getLongValue(existing, "fail_cnt") + getLongValue(row, "fail_cnt"));
+                    existing.put("tot_tokens", getLongValue(existing, "tot_tokens") + getLongValue(row, "tot_tokens"));
+                    existing.put("prompt_tokens", getLongValue(existing, "prompt_tokens") + getLongValue(row, "prompt_tokens"));
+                    existing.put("completion_tokens", getLongValue(existing, "completion_tokens") + getLongValue(row, "completion_tokens"));
                 }
             }
         }
@@ -454,5 +454,14 @@ public class StatsService {
         }
         
         return result;
+    }
+
+    private long getLongValue(Map<String, Object> map, String key) {
+        if (map == null) return 0L;
+        Object val = map.get(key);
+        if (val instanceof Number) {
+            return ((Number) val).longValue();
+        }
+        return 0L;
     }
 }

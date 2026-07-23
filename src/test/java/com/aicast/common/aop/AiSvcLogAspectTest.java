@@ -233,11 +233,11 @@ class AiSvcLogAspectTest {
 
         TbAiSvcLog savedLog = logCaptor.getValue();
         assertEquals("TRANSLATE", savedLog.getSvcType());
-        assertEquals(50, savedLog.getPromptTokens());
-        assertEquals(30, savedLog.getCompletionTokens());
-        assertEquals(80, savedLog.getTotalTokens());
-        assertNotNull(savedLog.getResSize());
-        assertTrue(savedLog.getResSize() > 0);
+        assertNull(savedLog.getPromptTokens());
+        assertNull(savedLog.getCompletionTokens());
+        assertNull(savedLog.getTotalTokens());
+        assertEquals(50, savedLog.getReqSize());
+        assertEquals(30, savedLog.getResSize());
     }
 
     @Test
@@ -260,7 +260,7 @@ class AiSvcLogAspectTest {
         TbAiSvcLog savedLog = logCaptor.getValue();
         assertNull(savedLog.getPromptTokens());
         assertNull(savedLog.getCompletionTokens());
-        assertNull(savedLog.getTotalTokens());
+        assertEquals(9, savedLog.getTotalTokens());
         assertNotNull(savedLog.getResSize());
     }
 }
