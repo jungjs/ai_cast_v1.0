@@ -1,6 +1,7 @@
 package com.aicast.common.aop;
 
 import com.aicast.client.nlp.NlpResult;
+import com.aicast.client.ocr.OcrResult;
 import com.aicast.client.translate.TranslationResult;
 import com.aicast.domain.log.TbAiSvcLog;
 import com.aicast.service.log.AiSvcLogService;
@@ -66,6 +67,14 @@ public class AiSvcLogAspect {
                 totalTokens = null;
                 reqSize = tr.getPromptTokens(); // 번역 원문 글자 수
                 resSize = tr.getCompletionTokens(); // 번역 완료 텍스트 글자 수
+            } else if ("STT".equals(svcType) && result instanceof String) {
+                String txt = (String) result;
+                totalTokens = txt.length();
+            } else if (result instanceof OcrResult) {
+                OcrResult ocr = (OcrResult) result;
+                if (ocr.getExtractedText() != null) {
+                    totalTokens = ocr.getExtractedText().length();
+                }
             }
 
             if (result != null && resSize == null) {

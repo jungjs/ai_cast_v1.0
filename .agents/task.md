@@ -85,6 +85,8 @@
   - [PipelineController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/PipelineController.java) 내의 각 API 메소드에서 `FAILED` 수신 시 `INTERNAL_SERVER_ERROR`를 반환하도록 고친 뒤 push 배포합니다.
 - [x] **T-76. 번역(Translate) 연산 시 토큰 대신 글자 수 컬럼(req_size/res_size)으로 가치 분리 수집 패치**
   - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 번역 시 토큰은 null로 적재하고, 글자 수를 크기 지표로 매핑하여 push합니다.
+- [x] **T-77. STT / OCR 연산 시 추출 텍스트 글자 수를 totalTokens 에 반영 수집 패치**
+  - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 STT(String), OCR(OcrResult) 호출 완료 시 획득된 텍스트의 글자 수를 totalTokens 필드에 바인딩하여 push합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
