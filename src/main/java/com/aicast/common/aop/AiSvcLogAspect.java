@@ -61,14 +61,11 @@ public class AiSvcLogAspect {
                 totalTokens = nlp.getTotalTokens();
             } else if (result instanceof TranslationResult) {
                 TranslationResult tr = (TranslationResult) result;
-                promptTokens = tr.getPromptTokens();
-                completionTokens = tr.getCompletionTokens();
-                totalTokens = tr.getTotalTokens();
-                if (tr.getTranslations() != null) {
-                    resSize = tr.getTranslations().values().stream()
-                            .mapToInt(s -> s.getBytes(StandardCharsets.UTF_8).length)
-                            .sum();
-                }
+                promptTokens = null;
+                completionTokens = null;
+                totalTokens = null;
+                reqSize = tr.getPromptTokens(); // 번역 원문 글자 수
+                resSize = tr.getCompletionTokens(); // 번역 완료 텍스트 글자 수
             }
 
             if (result != null && resSize == null) {
