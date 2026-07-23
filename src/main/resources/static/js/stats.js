@@ -342,8 +342,10 @@ function formatUsage(svcType, totTokens) {
     const formatted = totTokens.toLocaleString();
     if (svcType === 'NLP') return `${formatted} 토큰`;
     if (svcType === 'TRANSLATE') return `${formatted} 자`;
-    if (svcType === 'STT' || svcType === 'OCR') return `${formatted} 자`;
+    if (svcType === 'STT') return `${formatted} 초`;
+    if (svcType === 'OCR') return `${formatted} 건`;
     if (svcType === 'STORAGE') {
+        if (totTokens >= 1024 * 1024 * 1024) return `${(totTokens / (1024 * 1024 * 1024)).toFixed(1)} GB`;
         if (totTokens >= 1024 * 1024) return `${(totTokens / (1024 * 1024)).toFixed(1)} MB`;
         if (totTokens >= 1024) return `${(totTokens / 1024).toFixed(1)} KB`;
         return `${formatted} B`;

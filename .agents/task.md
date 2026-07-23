@@ -93,8 +93,12 @@
   - [AiSvcLogAspect.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/common/aop/AiSvcLogAspect.java) 를 수정하여 STT 재생 초를 req_size로, STORAGE 파일 용량을 res_size로 수집하도록 조율합니다.
 - [x] **T-80. 로컬 Maven 빌드 및 컴파일 유닛 테스트 검증**
   - 로컬 환경변수 기반 컴파일 및 테스트를 돌려 오류가 없는지 최종 빌드 검증을 진행합니다.
-- [/] **T-81. 로컬 Git 커밋 보존 (원격 Push 배포 보류)**
+- [x] **T-81. 로컬 Git 커밋 보존 (원격 Push 배포 보류)**
   - 로컬 Git 변경분을 커밋하되, 원격 push는 진행하지 않고 대기합니다.
+- [x] **T-82. StatsService 내 AI Svc 요약 쿼리 다차원 과금 지표 SUM 연산 튜닝**
+  - [StatsService.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/service/log/StatsService.java) 내의 모든 `SUM(total_tokens)` 쿼리를 다차원 컬럼 조건부 합계(STT:req_size, STORAGE:res_size, TRANSLATE:res_size, OCR:1건) 구조로 튜닝합니다.
+- [x] **T-83. stats.js 내 서비스 타입별 과금 단위 매핑 교정**
+  - [stats.js](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/resources/static/js/stats.js) 내의 formatUsage 함수를 수정하여 STT는 '초', OCR은 '건'으로 표출되도록 고치고 STORAGE 단위를 정합합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**

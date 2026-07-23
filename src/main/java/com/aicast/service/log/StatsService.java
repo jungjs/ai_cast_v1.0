@@ -44,7 +44,7 @@ public class StatsService {
                 COUNT(CASE WHEN l.is_ok = TRUE THEN 1 END),
                 COUNT(CASE WHEN l.is_ok = FALSE THEN 1 END),
                 COALESCE(AVG(l.proc_ms), 0),
-                COALESCE(SUM(l.total_tokens), 0),
+                COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0),
                 COALESCE(SUM(l.prompt_tokens), 0),
                 COALESCE(SUM(l.completion_tokens), 0)
             FROM tb_ai_svc_log l
@@ -81,7 +81,7 @@ public class StatsService {
                 COUNT(CASE WHEN l.is_ok = TRUE THEN 1 END),
                 COUNT(CASE WHEN l.is_ok = FALSE THEN 1 END),
                 COALESCE(AVG(l.proc_ms), 0),
-                COALESCE(SUM(l.total_tokens), 0),
+                COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0),
                 COALESCE(SUM(l.prompt_tokens), 0),
                 COALESCE(SUM(l.completion_tokens), 0)
             FROM tb_ai_svc_log l
@@ -145,7 +145,7 @@ public class StatsService {
                            SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
                            SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
                            COALESCE(AVG(l.proc_ms), 0) AS avg_ms, 
-                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0) AS tot_tokens, 
                            COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
                            COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
                     FROM tb_ai_svc_log l
@@ -160,7 +160,7 @@ public class StatsService {
                            SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
                            SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
                            COALESCE(AVG(l.proc_ms), 0) AS avg_ms, 
-                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0) AS tot_tokens, 
                            COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
                            COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
                     FROM tb_ai_svc_log l
@@ -260,7 +260,7 @@ public class StatsService {
                            COUNT(*) AS tot_cnt, 
                            SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
                            SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
-                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0) AS tot_tokens, 
                            COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
                            COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
                     FROM tb_ai_svc_log l
@@ -274,7 +274,7 @@ public class StatsService {
                            COUNT(*) AS tot_cnt, 
                            SUM(CASE WHEN l.is_ok = 1 THEN 1 ELSE 0 END) AS ok_cnt, 
                            SUM(CASE WHEN l.is_ok = 0 THEN 1 ELSE 0 END) AS fail_cnt, 
-                           COALESCE(SUM(l.total_tokens), 0) AS tot_tokens, 
+                           COALESCE(SUM(CASE WHEN l.svc_type = 'STORAGE' THEN l.res_size WHEN l.svc_type = 'STT' THEN l.req_size WHEN l.svc_type = 'TRANSLATE' THEN l.res_size WHEN l.svc_type = 'OCR' THEN 1 ELSE l.total_tokens END), 0) AS tot_tokens, 
                            COALESCE(SUM(l.prompt_tokens), 0) AS prompt_tokens, 
                            COALESCE(SUM(l.completion_tokens), 0) AS completion_tokens
                     FROM tb_ai_svc_log l
