@@ -4,6 +4,7 @@ import com.aicast.dto.response.PipelineResponse;
 import com.aicast.service.pipeline.PipelineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,9 @@ public class PipelineController {
         
         log.info("Received process_audio request. file={}, langs={}", audioFile.getOriginalFilename(), targetLangs);
         PipelineResponse response = pipelineService.executeAudio(audioFile, targetLangs);
+        if ("FAILED".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -40,6 +44,9 @@ public class PipelineController {
         
         log.info("Received process_text request. text={}, langs={}", text, targetLangs);
         PipelineResponse response = pipelineService.executeText(text, targetLangs);
+        if ("FAILED".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -50,6 +57,9 @@ public class PipelineController {
         
         log.info("Received process_img request. file={}, langs={}", imageFile.getOriginalFilename(), targetLangs);
         PipelineResponse response = pipelineService.executeImage(imageFile, targetLangs);
+        if ("FAILED".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 }

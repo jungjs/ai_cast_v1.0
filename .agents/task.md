@@ -81,6 +81,8 @@
   - [.github/workflows/azure-deploy.yml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/.github/workflows/azure-deploy.yml) 의 `app-name` 설정을 신규 리소스명인 `aicast-av-dev` 로 변경 후 원격 push하여 배포를 기동합니다.
 - [x] **T-74. Azure Speech SDK 버전 격상을 통한 OpenSSL 3.0 리눅스 호환 패치**
   - [pom.xml](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/pom.xml) 의 `com.microsoft.cognitiveservices.speech` 버전을 `1.34.0` 에서 `1.38.0` 으로 올려 원격 push하여 배포를 기동합니다.
+- [x] **T-75. AI 파이프라인 실패 응답 시 HTTP 500 에러 동기화 및 DB 상태 기록 정합성 패치**
+  - [PipelineController.java](file:///e:/모빌리티사업본부/프로젝트/2026/vibe coding/workspace/AI_Cast/src/main/java/com/aicast/controller/PipelineController.java) 내의 각 API 메소드에서 `FAILED` 수신 시 `INTERNAL_SERVER_ERROR`를 반환하도록 고친 뒤 push 배포합니다.
 
 ### 👤 Bake (Baker) - 사용 모델: Big Pickle
 - [x] **T-37. 서버 재컴파일 배포 및 웹브라우저 가동 최종 E2E 검증**
